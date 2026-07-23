@@ -1,0 +1,64 @@
+/* ManagerDashboard.css */
+.manager-dashboard {
+    width: auto;
+    max-width: 800px; /* Adjust width as needed */
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #ffffff; /* White background for consistency */
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.manager-dashboard h1, .manager-dashboard h2 {
+    color: #333; /* Dark grey text for headings */
+    margin-bottom: 20px;
+}
+
+.manager-dashboard ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.manager-dashboard li {
+    background-color: #F4F7F5; /* Light grey background for list items */
+    border-radius: 15px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc; /* Subtle border for separation */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.manager-dashboard button {
+    padding: 8px 16px;
+    background-color: #32a852; /* Consistent green button */
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 0.9rem; /* Slightly smaller font size for buttons */
+    width: 20%;
+}
+
+.manager-dashboard button.red {
+    background-color: #8a2525; /* Consistent green button */
+}
+
+
+.manager-dashboard button:hover {
+    background-color: #278440; /* Darker green on hover */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Slight shadow for depth */
+}
+
+.manager-dashboard button.red:hover {
+    background-color: #73291b; /* Darker green on hover */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Slight shadow for depth */
+}
+
+.manager-dashboard li span {
+    width: 58%;
+    display: block;
+}

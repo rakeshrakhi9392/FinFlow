@@ -1,0 +1,40 @@
+/* ReimbursementList.css */
+.reimbursement-list {
+    max-width: 400px; /* Larghezza uniformata come le pagine di login e registrazione */
+    margin: 5% auto; /* Centratura e spaziatura verticale simile */
+    padding: 20px; /* Padding uniforme */
+    background-color: #ffffff; /* Sfondo bianco come negli altri form */
+    border-radius: 5px; /* Raggio del bordo arrotondato */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Ombreggiatura come nei form di autenticazione */
+}
+
+.reimbursement-list h2 {
+    text-align: center;
+    margin-bottom: 20px; /* Aggiunta di margine sotto il titolo per spazio visivo */
+    color: #333; /* Colore del testo coerente */
+    font-size: 1.5rem; /* Dimensione del font per i titoli */
+}
+
+.reimbursement-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0; /* Rimozione del margine predefinito */
+}
+
+.reimbursement-list li {
+    padding: 10px 15px; /* Padding coerente con gli input container */
+    border-bottom: 1px solid #ccc;
+    background-color: #F4F7F5; /* Sfondo per ogni elemento come gli input */
+    margin-bottom: 10px; /* Margine inferiore per separare gli elementi */
+    border-radius: 15px; /* Bordi arrotondati per coerenza */
+}
+
+
+
+.reimbursement-list li:last-child {
+    border-bottom: none;
+}
+
+.reimbursement-list li:hover {
+    background-color: #e8e8e8; /* Cambio colore all'hover per coerenza con gli input */
+}

@@ -1,0 +1,18 @@
+/* App.css */
+
+
+body {
+  background-image: url(../public/expense-reimbursements.jpg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-color: rgb(235, 235, 235);
+  background-attachment: fixed;
+}
+
+/* Media query for devices with screen sizes smaller than 768px */
+@media (max-width: 768px) {
+  body {
+    background-size: cover; /* Continue using cover to ensure it fills the area */
+    background-position: center; /* Center the image to focus on the middle */
+  }
+}
