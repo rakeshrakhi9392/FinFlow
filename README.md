@@ -219,8 +219,3 @@ If you fork or reuse this work, retain the copyright notice in [LICENSE](LICENSE
 
 **Madasu Rakesh**
 
-## License
-
-Copyright (c) 2026 Madasu Rakesh  
-
-Licensed under the [MIT License](LICENSE).
