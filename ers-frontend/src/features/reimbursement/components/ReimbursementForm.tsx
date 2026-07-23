@@ -41,11 +41,11 @@ export const ReimbursementForm: React.FC<ReimbursementFormProps> = ({ onReimburs
         ...(formData.categoryId ? { categoryId: Number(formData.categoryId) } : {}),
       };
       const created = await reimbursementService.create(payload);
-      const escalated = created.status === 'REQUIRES_SENIOR_APPROVAL';
+      const escalated = !!created.requiresSeniorReview;
       alert(
         escalated
-          ? 'Submitted. Amount exceeds remaining department budget — routed for senior approval.'
-          : 'Reimbursement submitted for manager approval.'
+          ? 'Submitted for manager review. This claim is flagged for senior manager escalation (amount and/or budget rules).'
+          : 'Reimbursement submitted. It is now in Manager Review.'
       );
       setFormData({ amount: '', description: '', categoryId: '' });
       onReimbursementSubmit();
@@ -59,7 +59,7 @@ export const ReimbursementForm: React.FC<ReimbursementFormProps> = ({ onReimburs
     <div className="form-container">
       <div className="form-content">
         <h1>Submit Your Reimbursement Request</h1>
-        <p>Fill out the form below. Over-budget requests escalate to senior approval.</p>
+        <p>Fill out the form below. Claims may escalate by amount threshold or remaining budget.</p>
         <form onSubmit={handleSubmit}>
           <div className="input-container">
             <Icons.Money className="icon" />

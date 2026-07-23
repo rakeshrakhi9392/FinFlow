@@ -1,0 +1,74 @@
+.approval-history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.history-item {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid #94a3b8;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+}
+
+.action-approved,
+.action-escalated,
+.action-vendor_marked_paid {
+  border-left-color: #16a34a;
+}
+
+.action-denied {
+  border-left-color: #dc2626;
+}
+
+.action-submitted {
+  border-left-color: #2563eb;
+}
+
+.history-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.history-action {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0f172a;
+}
+
+.history-top time {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.history-transition,
+.history-actor {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.history-comment {
+  margin: 0.55rem 0 0;
+  padding: 0.55rem 0.7rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+  color: #334155;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.history-empty {
+  color: #64748b;
+  font-size: 0.9rem;
+}

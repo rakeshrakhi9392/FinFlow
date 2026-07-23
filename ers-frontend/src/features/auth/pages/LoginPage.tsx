@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../../context/AppContext';
 import { useLogin } from '../hooks/useLogin';
-import { ROUTES } from '../../../shared/utils/constants';
+import { dashboardRouteForRole, ROUTES } from '../../../shared/utils/constants';
 import { Icons } from '../../../shared/utils/icons';
 import { UserFormState } from '../../../types';
 import '../components/Auth.css';
@@ -25,7 +25,7 @@ export const Login: React.FC<LoginProps> = ({ setUserRole }) => {
   useEffect(() => {
     if (sessionUser) {
       setUserRole(sessionUser.role);
-      navigate(sessionUser.role === 'manager' ? ROUTES.managerDashboard : ROUTES.employeeDashboard);
+      navigate(dashboardRouteForRole(sessionUser.role));
     }
   }, [sessionUser, setUserRole, navigate]);
 

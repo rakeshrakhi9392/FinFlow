@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { authService } from '../../../services/authService';
 import { useAppContext } from '../../../context/AppContext';
 import { getErrorMessage } from '../../../shared/utils/errorUtils';
-import { ROUTES } from '../../../shared/utils/constants';
+import { dashboardRouteForRole } from '../../../shared/utils/constants';
 import { LoginCredentials } from '../../../types';
 
 export function useLogin() {
@@ -18,7 +18,7 @@ export function useLogin() {
     try {
       const authUser = await authService.login(credentials);
       setUser(authUser);
-      navigate(authUser.role === 'manager' ? ROUTES.managerDashboard : ROUTES.employeeDashboard);
+      navigate(dashboardRouteForRole(authUser.role));
       return authUser;
     } catch (err) {
       const message = getErrorMessage(err, 'Login Failed!');

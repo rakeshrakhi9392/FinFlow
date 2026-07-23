@@ -1,0 +1,133 @@
+.approval-workspace {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem 2.5rem;
+}
+
+.workspace-hero {
+  background: linear-gradient(135deg, #0f766e 0%, #134e4a 55%, #1e293b 100%);
+  color: #f8fafc;
+  border-radius: 18px;
+  padding: 1.75rem 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
+  text-align: left;
+}
+
+.role-pill {
+  display: inline-block;
+  margin: 0 0 0.6rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.workspace-hero h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+.workspace-hero p {
+  margin: 0.45rem 0 0;
+  color: #ccfbf1;
+  max-width: 42rem;
+}
+
+.workspace-nav {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.workspace-nav a {
+  color: #ecfeff;
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 1px solid transparent;
+}
+
+.workspace-nav a:hover {
+  border-bottom-color: #99f6e4;
+}
+
+.config-panel,
+.queue-section {
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 16px;
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.config-panel h2,
+.queue-heading h2 {
+  margin: 0 0 0.75rem;
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.config-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.config-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-align: left;
+  color: #334155;
+  font-size: 0.85rem;
+}
+
+.config-row input[type='number'] {
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  min-width: 160px;
+}
+
+.config-row .checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.config-msg {
+  margin: 0.75rem 0 0;
+  color: #0f766e;
+  font-size: 0.9rem;
+}
+
+.queue-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.queue-heading .ghost {
+  width: auto;
+  background: transparent;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+  border-radius: 10px;
+}
+
+.empty-queue,
+.error-text {
+  color: #64748b;
+}
+
+.error-text {
+  color: #b91c1c;
+}

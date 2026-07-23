@@ -15,18 +15,30 @@ The ERS application consists of two main components:
 
 ## Features
 
+### Enterprise approval workflow
+- Multi-stage pipeline: **Submitted → Manager Review → Senior Manager Review (if required) → Finance Review → Vendor Processing → Paid**
+- Configurable escalation by **amount threshold** and **remaining budget**
+- Approval **comments**, **timestamps**, and full **approval history**
+- Timeline UI with status badges and role-specific actions
+- Documented in [WORKFLOW.md](WORKFLOW.md)
+
 ### Employee Features
 - **Account Creation**: Employees can create an account to access the system.
 - **Reimbursement Submission**: Employees can submit reimbursement requests.
-- **View Reimbursements**: Employees can view their own reimbursement tickets and pending reimbursement tickets.
+- **View Reimbursements**: Employees can track their claims through every workflow stage.
 
-### Manager Features
-- **View Reimbursements**: Managers can view all reimbursements.
-- **Resolve Reimbursements**: Managers can approve or deny reimbursement requests.
-- **User Management**: Managers can view all users and delete users (with related reimbursements).
+### Manager / Senior Manager / Finance Features
+- Role-specific review queues with approve / deny (and mark paid for finance).
+- Budget dashboard visibility for elevated roles.
 
-### Validation
-- **User Authentication**: The system ensures that only logged-in users can access functionalities. Using Spring Security, the backend manages sessions and authentication states securely. Each request is verified to ensure that it comes from an authenticated session before any user-specific actions are processed. In case of session expiration or non-authentication, the system redirects users to the login page.
+### Admin Features
+- Configure workflow escalation rules.
+- Act across stages and manage users.
+
+### Validation & Security
+- **Spring Security RBAC** with roles: `employee`, `manager`, `senior_manager`, `finance`, `admin`.
+- Session-based authentication; passwords hashed with BCrypt.
+- Endpoints and workflow transitions enforce role permissions.
 
 ### Integration of Frontend and Backend
 - **API Communication**: The frontend uses Axios to make HTTP requests to the backend. These requests include credentials where necessary, and the backend uses session cookies to maintain user state across requests.

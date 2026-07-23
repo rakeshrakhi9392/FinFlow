@@ -9,8 +9,10 @@ import com.reimbursement.repository.BudgetRepository;
 import com.reimbursement.repository.DepartmentRepository;
 import com.reimbursement.repository.ExpenseCategoryRepository;
 import com.reimbursement.repository.UserRepository;
+import com.reimbursement.service.WorkflowConfigService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,7 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Seeds enterprise finance reference data for local demos.
+ * Seeds enterprise finance reference data, workflow config, and demo users.
  */
 @Component
 @Profile("!test")
@@ -28,21 +30,30 @@ public class FinanceDataInitializer implements CommandLineRunner {
     private final ExpenseCategoryRepository expenseCategoryRepository;
     private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final WorkflowConfigService workflowConfigService;
 
     public FinanceDataInitializer(DepartmentRepository departmentRepository,
                                   ExpenseCategoryRepository expenseCategoryRepository,
                                   BudgetRepository budgetRepository,
-                                  UserRepository userRepository) {
+                                  UserRepository userRepository,
+                                  PasswordEncoder passwordEncoder,
+                                  WorkflowConfigService workflowConfigService) {
         this.departmentRepository = departmentRepository;
         this.expenseCategoryRepository = expenseCategoryRepository;
         this.budgetRepository = budgetRepository;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.workflowConfigService = workflowConfigService;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
+        workflowConfigService.ensureDefaultConfig();
+
         if (departmentRepository.count() > 0) {
+            seedDemoUsersIfMissing();
             return;
         }
 
@@ -71,28 +82,34 @@ public class FinanceDataInitializer implements CommandLineRunner {
         seedDemoUsers(engineering, finance);
     }
 
+    private void seedDemoUsersIfMissing() {
+        Department engineering = departmentRepository.findByCode("ENG").orElse(null);
+        Department finance = departmentRepository.findByCode("FIN").orElse(null);
+        if (engineering != null && finance != null) {
+            seedDemoUsers(engineering, finance);
+        }
+    }
+
     private void seedDemoUsers(Department engineering, Department finance) {
-        if (!userRepository.existsByUsername("employee1")) {
-            User employee = new User();
-            employee.setUsername("employee1");
-            employee.setPassword("password");
-            employee.setRole("employee");
-            employee.setFirstName("Alex");
-            employee.setLastName("Employee");
-            employee.setEmail("employee1@company.com");
-            employee.setDepartment(engineering);
-            userRepository.save(employee);
+        seedUser("employee1", "employee", "Alex", "Employee", "employee1@company.com", engineering);
+        seedUser("manager1", "manager", "Morgan", "Manager", "manager1@company.com", engineering);
+        seedUser("senior1", "senior_manager", "Sam", "Senior", "senior1@company.com", engineering);
+        seedUser("finance1", "finance", "Frankie", "Finance", "finance1@company.com", finance);
+        seedUser("admin1", "admin", "Avery", "Admin", "admin1@company.com", finance);
+    }
+
+    private void seedUser(String username, String role, String first, String last, String email, Department dept) {
+        if (userRepository.existsByUsername(username)) {
+            return;
         }
-        if (!userRepository.existsByUsername("manager1")) {
-            User manager = new User();
-            manager.setUsername("manager1");
-            manager.setPassword("password");
-            manager.setRole("manager");
-            manager.setFirstName("Morgan");
-            manager.setLastName("Manager");
-            manager.setEmail("manager1@company.com");
-            manager.setDepartment(finance);
-            userRepository.save(manager);
-        }
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode("password"));
+        user.setRole(role);
+        user.setFirstName(first);
+        user.setLastName(last);
+        user.setEmail(email);
+        user.setDepartment(dept);
+        userRepository.save(user);
     }
 }

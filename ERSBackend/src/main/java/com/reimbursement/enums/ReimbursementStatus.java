@@ -1,25 +1,90 @@
 package com.reimbursement.enums;
 
+/**
+ * Enterprise reimbursement lifecycle.
+ *
+ * <pre>
+ * SUBMITTED → MANAGER_REVIEW → [SENIOR_MANAGER_REVIEW] → FINANCE_REVIEW → VENDOR_PROCESSING → PAID
+ * </pre>
+ *
+ * Any review stage may transition to {@link #DENIED}.
+ */
 public enum ReimbursementStatus {
-    MANAGER_APPROVAL,
-    REQUIRES_SENIOR_APPROVAL,
-    APPROVED,
-    DENIED;
+    SUBMITTED,
+    MANAGER_REVIEW,
+    SENIOR_MANAGER_REVIEW,
+    FINANCE_REVIEW,
+    VENDOR_PROCESSING,
+    PAID,
+    DENIED,
 
-    /**
-     * Legacy PENDING maps to manager-level approval for older clients.
-     */
+    /** @deprecated Legacy — prefer {@link #MANAGER_REVIEW} */
+    @Deprecated
+    MANAGER_APPROVAL,
+    /** @deprecated Legacy — prefer {@link #SENIOR_MANAGER_REVIEW} */
+    @Deprecated
+    REQUIRES_SENIOR_APPROVAL,
+    /** @deprecated Legacy — prefer {@link #PAID} */
+    @Deprecated
+    APPROVED;
+
     public static ReimbursementStatus fromLegacy(String value) {
         if (value == null) {
-            return MANAGER_APPROVAL;
+            return MANAGER_REVIEW;
         }
         if ("PENDING".equalsIgnoreCase(value) || "Pending".equals(value)) {
-            return MANAGER_APPROVAL;
+            return MANAGER_REVIEW;
+        }
+        if ("MANAGER_APPROVAL".equalsIgnoreCase(value)) {
+            return MANAGER_REVIEW;
+        }
+        if ("REQUIRES_SENIOR_APPROVAL".equalsIgnoreCase(value)) {
+            return SENIOR_MANAGER_REVIEW;
+        }
+        if ("APPROVED".equalsIgnoreCase(value) || "Approved".equals(value)) {
+            return PAID;
+        }
+        if ("Denied".equals(value)) {
+            return DENIED;
         }
         return ReimbursementStatus.valueOf(value.toUpperCase().replace(' ', '_'));
     }
 
+    public boolean isTerminal() {
+        return this == PAID || this == DENIED;
+    }
+
+    public boolean isReviewStage() {
+        return this == MANAGER_REVIEW
+                || this == SENIOR_MANAGER_REVIEW
+                || this == FINANCE_REVIEW;
+    }
+
+    public boolean isAwaitingAction() {
+        return this == SUBMITTED
+                || isReviewStage()
+                || this == VENDOR_PROCESSING
+                || this == MANAGER_APPROVAL
+                || this == REQUIRES_SENIOR_APPROVAL;
+    }
+
+    /** @deprecated Use {@link #isAwaitingAction()} */
+    @Deprecated
     public boolean isAwaitingApproval() {
-        return this == MANAGER_APPROVAL || this == REQUIRES_SENIOR_APPROVAL;
+        return isReviewStage()
+                || this == MANAGER_APPROVAL
+                || this == REQUIRES_SENIOR_APPROVAL;
+    }
+
+    public String displayLabel() {
+        return switch (this) {
+            case SUBMITTED -> "Submitted";
+            case MANAGER_REVIEW, MANAGER_APPROVAL -> "Manager Review";
+            case SENIOR_MANAGER_REVIEW, REQUIRES_SENIOR_APPROVAL -> "Senior Manager Review";
+            case FINANCE_REVIEW -> "Finance Review";
+            case VENDOR_PROCESSING -> "Vendor Processing";
+            case PAID, APPROVED -> "Paid";
+            case DENIED -> "Denied";
+        };
     }
 }

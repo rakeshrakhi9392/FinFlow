@@ -1,0 +1,146 @@
+.approval-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-step {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 0.75rem;
+  min-height: 4.25rem;
+}
+
+.timeline-rail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.timeline-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #94a3b8;
+  background: #fff;
+  margin-top: 0.2rem;
+  z-index: 1;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.timeline-connector {
+  flex: 1;
+  width: 2px;
+  background: linear-gradient(180deg, #cbd5e1, #e2e8f0);
+  margin-top: 0.25rem;
+}
+
+.timeline-body {
+  text-align: left;
+  padding-bottom: 1rem;
+}
+
+.timeline-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.timeline-heading strong {
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.timeline-state-chip {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.timeline-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.current-hint {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.state-completed .timeline-dot {
+  background: #16a34a;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.15);
+}
+
+.state-completed .timeline-connector {
+  background: #86efac;
+}
+
+.state-current .timeline-dot {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  transform: scale(1.15);
+  box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.2);
+  animation: pulse-current 1.8s ease-in-out infinite;
+}
+
+.state-current .timeline-state-chip {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.state-skipped .timeline-dot {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  border-style: dashed;
+}
+
+.state-skipped .timeline-heading strong,
+.state-skipped .timeline-meta {
+  color: #94a3b8;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.state-denied .timeline-dot {
+  background: #dc2626;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.15);
+}
+
+.state-denied .timeline-state-chip {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.state-upcoming .timeline-dot {
+  background: #fff;
+  border-color: #cbd5e1;
+}
+
+.timeline-empty {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+@keyframes pulse-current {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18); }
+  50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.08); }
+}
+
+@media (max-width: 640px) {
+  .timeline-step {
+    min-height: 3.75rem;
+  }
+}

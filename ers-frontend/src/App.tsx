@@ -5,23 +5,22 @@ import Logout from './features/auth/pages/LogoutPage';
 import { Register } from './features/auth/pages/RegisterPage';
 import EmployeeDashboard from './features/dashboard/pages/EmployeeDashboardPage';
 import ManagerDashboard from './features/dashboard/pages/ManagerDashboardPage';
+import SeniorDashboard from './features/dashboard/pages/SeniorDashboardPage';
+import FinanceDashboard from './features/dashboard/pages/FinanceDashboardPage';
+import AdminDashboard from './features/dashboard/pages/AdminDashboardPage';
 import BudgetDashboard from './features/dashboard/pages/BudgetDashboardPage';
-import { ROUTES } from './shared/utils/constants';
+import { dashboardRouteForRole, ROUTES } from './shared/utils/constants';
 import './App.css';
 
 const App: React.FC = () => {
   const [role, setRole] = useState<string | null>(null);
-
-  // Preserved prior routing behavior: home always routes by role when "authenticated".
   const isAuthenticated = true;
 
   const renderMainRoute = () => {
     if (!isAuthenticated) {
       return <Navigate to={ROUTES.login} />;
     }
-    return role === 'manager'
-      ? <Navigate to={ROUTES.managerDashboard} />
-      : <Navigate to={ROUTES.employeeDashboard} />;
+    return <Navigate to={dashboardRouteForRole(role)} />;
   };
 
   return (
@@ -33,6 +32,9 @@ const App: React.FC = () => {
           <Route path={ROUTES.register} element={<Register />} />
           <Route path={ROUTES.employeeDashboard} element={<EmployeeDashboard setUserRole={setRole} />} />
           <Route path={ROUTES.managerDashboard} element={<ManagerDashboard />} />
+          <Route path={ROUTES.seniorDashboard} element={<SeniorDashboard />} />
+          <Route path={ROUTES.financeDashboard} element={<FinanceDashboard />} />
+          <Route path={ROUTES.adminDashboard} element={<AdminDashboard />} />
           <Route path={ROUTES.budgetDashboard} element={<BudgetDashboard />} />
           <Route path={ROUTES.home} element={renderMainRoute()} />
         </Routes>

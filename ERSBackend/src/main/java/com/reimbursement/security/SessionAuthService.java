@@ -1,13 +1,20 @@
 package com.reimbursement.security;
 
 import com.reimbursement.constant.AppConstants;
+import com.reimbursement.enums.UserRole;
 import com.reimbursement.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
- * Session-based auth helpers. Full Spring Security can replace this later
- * without changing controllers if they depend on this facade.
+ * Bridges HTTP session attributes with Spring Security's SecurityContext.
  */
 @Component
 public class SessionAuthService {
@@ -16,9 +23,21 @@ public class SessionAuthService {
         session.setAttribute(AppConstants.SESSION_USER_ID, userId);
         session.setAttribute(AppConstants.SESSION_USERNAME, username);
         session.setAttribute(AppConstants.SESSION_ROLE, role);
+
+        UserRole userRole = UserRole.fromValue(role);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                username,
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_" + userRole.springRole()))
+        );
+        SecurityContext context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authentication);
+        SecurityContextHolder.setContext(context);
+        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
     }
 
     public void clearSession(HttpSession session) {
+        SecurityContextHolder.clearContext();
         if (session != null) {
             session.invalidate();
         }
@@ -30,6 +49,14 @@ public class SessionAuthService {
             throw new UnauthorizedException("Session expired or user not logged in.");
         }
         return userId;
+    }
+
+    public UserRole requireRole(HttpSession session) {
+        String role = getRole(session);
+        if (role == null) {
+            throw new UnauthorizedException("Session expired or user not logged in.");
+        }
+        return UserRole.fromValue(role);
     }
 
     public Integer getUserId(HttpSession session) {

@@ -11,6 +11,7 @@ import com.reimbursement.exception.ResourceNotFoundException;
 import com.reimbursement.mapper.UserMapper;
 import com.reimbursement.repository.DepartmentRepository;
 import com.reimbursement.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +22,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final DepartmentRepository departmentRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
                        UserMapper userMapper,
-                       DepartmentRepository departmentRepository) {
+                       DepartmentRepository departmentRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.departmentRepository = departmentRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -36,15 +40,19 @@ public class UserService {
             throw new BadRequestException("Username already exists");
         }
         User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setDepartment(resolveDepartment(request.getDepartmentId()));
         User saved = userRepository.save(user);
         return userMapper.toLoginResponse(saved);
     }
 
     public UserLoginResponse loginUser(LoginRequest request) {
-        return userRepository.findByUsernameAndPassword(request.getUsername(), request.getPassword())
-                .map(userMapper::toLoginResponse)
+        User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AuthenticationException("Login Failed!"));
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AuthenticationException("Login Failed!");
+        }
+        return userMapper.toLoginResponse(user);
     }
 
     @Transactional

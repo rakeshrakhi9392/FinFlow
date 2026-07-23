@@ -12,4 +12,12 @@ export const authService = {
     const response = await apiClient.post<string>(API_PATHS.users, payload);
     return typeof response.data === 'string' ? response.data : 'Registration successful';
   },
+
+  async logout(): Promise<void> {
+    try {
+      await apiClient.post(API_PATHS.logout);
+    } catch {
+      // Clear local session even if the server call fails.
+    }
+  },
 };

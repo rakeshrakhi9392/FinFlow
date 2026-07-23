@@ -1,0 +1,60 @@
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.tone-submitted {
+  background: #eef2f7;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+
+.tone-manager {
+  background: #fff7ed;
+  color: #9a3412;
+  border-color: #fdba74;
+}
+
+.tone-senior {
+  background: #f5f3ff;
+  color: #5b21b6;
+  border-color: #c4b5fd;
+}
+
+.tone-finance {
+  background: #ecfeff;
+  color: #0e7490;
+  border-color: #67e8f9;
+}
+
+.tone-vendor {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.tone-paid {
+  background: #dcfce7;
+  color: #14532d;
+  border-color: #4ade80;
+}
+
+.tone-denied {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.tone-default {
+  background: #f8fafc;
+  color: #475569;
+  border-color: #e2e8f0;
+}
