@@ -1,0 +1,69 @@
+# Employee Reimbursement System — local / demo stack
+#
+# Local Postgres:
+#   docker compose --profile local-db up --build
+#
+# Neon (no local DB):
+#   Set SPRING_DATASOURCE_* in .env to your Neon JDBC URL, then:
+#   docker compose up --build
+
+services:
+  db:
+    image: postgres:16-alpine
+    profiles: ["local-db"]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-reimbursement}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ers_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-reimbursement}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./ERSBackend
+      dockerfile: Dockerfile
+    image: ers-backend:local
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      PORT: 8080
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://db:5432/reimbursement}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-password}
+      SPRING_JPA_DEFAULT_SCHEMA: ${SPRING_JPA_DEFAULT_SCHEMA:-public}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
+      ERS_CORS_ALLOWED_ORIGINS: ${ERS_CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8081}
+      ERS_API_SERVER_URL: ${ERS_API_SERVER_URL:-http://localhost:8080}
+      ERS_VENDOR_PROVIDER: ${ERS_VENDOR_PROVIDER:-mock-sap}
+      SERVER_SERVLET_SESSION_COOKIE_SECURE: ${SERVER_SERVLET_SESSION_COOKIE_SECURE:-false}
+      SERVER_SERVLET_SESSION_COOKIE_SAME_SITE: ${SERVER_SERVLET_SESSION_COOKIE_SAME_SITE:-lax}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/actuator/health | grep -q '\"status\":\"UP\"' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  frontend:
+    build:
+      context: ./ers-frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-http://localhost:8080}
+    image: ers-frontend:local
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  ers_pg_data:

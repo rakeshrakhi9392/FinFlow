@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { useAppContext } from '../../../context/AppContext';
 import { useLogin } from '../hooks/useLogin';
 import { dashboardRouteForRole, ROUTES } from '../../../shared/utils/constants';
@@ -7,58 +7,79 @@ import { Icons } from '../../../shared/utils/icons';
 import { UserFormState } from '../../../types';
 import '../components/Auth.css';
 
-interface LoginProps {
-  setUserRole: (role: string) => void;
-}
-
-export const Login: React.FC<LoginProps> = ({ setUserRole }) => {
+export const Login: React.FC = () => {
   const [user, setUser] = useState<UserFormState>({ username: '', password: '', role: '' });
-  const navigate = useNavigate();
-  const { user: sessionUser, setUser: setAuthUser } = useAppContext();
-  const { login } = useLogin();
+  const { user: sessionUser } = useAppContext();
+  const { login, isSubmitting, error } = useLogin();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  useEffect(() => {
-    if (sessionUser) {
-      setUserRole(sessionUser.role);
-      navigate(dashboardRouteForRole(sessionUser.role));
-    }
-  }, [sessionUser, setUserRole, navigate]);
-
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const authUser = await login({
+      await login({
         username: user.username,
         password: user.password || '',
       });
-      setUserRole(authUser.role);
-      setAuthUser(authUser);
     } catch {
-      alert('Login Failed!');
+      // Error message is surfaced via useLogin.
     }
   };
 
+  if (sessionUser) {
+    return <Navigate to={dashboardRouteForRole(sessionUser.role)} replace />;
+  }
+
   return (
-    <div className="login">
+    <main className="login" aria-labelledby="login-heading">
       <div className="text-container">
-        <h1>Welcome to the Employee Reimbursement System</h1>
-        <h3>Sign in to manage your reimbursements!</h3>
-        <div className="input-container">
-          <Icons.User className="icon" />
-          <input type="text" aria-label="Username" placeholder="Username" name="username" onChange={handleChange} />
-        </div>
-        <div className="input-container">
-          <Icons.Lock className="icon" />
-          <input type="password" aria-label="Password" placeholder="Password" name="password" onChange={handleChange} />
-        </div>
-        <button className="login-button" onClick={handleLogin}>Login</button>
-        <p className="register-link">Don't have an account? <span onClick={() => navigate(ROUTES.register)}>Sign up</span></p>
+        <h1 id="login-heading">Employee Reimbursement System</h1>
+        <p className="auth-subtitle">Sign in to manage your reimbursements</p>
       </div>
-    </div>
+      <form onSubmit={handleLogin} noValidate>
+        {error ? (
+          <p className="auth-error" role="alert">{error}</p>
+        ) : null}
+        <div className="input-container">
+          <Icons.User className="icon" aria-hidden="true" />
+          <label htmlFor="login-username" className="sr-only">Username</label>
+          <input
+            id="login-username"
+            type="text"
+            autoComplete="username"
+            placeholder="Username"
+            name="username"
+            value={user.username}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="input-container">
+          <Icons.Lock className="icon" aria-hidden="true" />
+          <label htmlFor="login-password" className="sr-only">Password</label>
+          <input
+            id="login-password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="Password"
+            name="password"
+            value={user.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button className="login-button" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Signing in…' : 'Login'}
+        </button>
+      </form>
+      <p className="register-link">
+        Don&apos;t have an account?{' '}
+        <Link to={ROUTES.register}>Sign up</Link>
+      </p>
+    </main>
   );
 };
 

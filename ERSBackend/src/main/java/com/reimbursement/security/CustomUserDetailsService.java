@@ -11,6 +11,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Supplies {@link UserDetails} for Spring Security auto-configuration.
+ * Interactive login uses {@link SessionAuthService} after credential checks in {@code UserService}.
+ */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 

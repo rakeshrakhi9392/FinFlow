@@ -1,92 +1,148 @@
 /* Auth.css */
 
 .login {
-    width: stretch;
+    width: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-radius: 5px;
+    border-radius: 12px;
     border: none;
-    padding: 20px;
+    padding: 1.5rem;
     background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    max-width: 400px;
-    margin: 5% auto 0; /* Increased top margin */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 420px;
+    margin: 5% auto 2rem;
 }
 
 .text-container {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
+}
+
+.auth-subtitle {
+    margin: 0.35rem 0 0;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.auth-error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
 }
 
 .input-container {
-    height: 40px;
-    margin-bottom: 20px;
-    background-color: #F4F7F5;
-    border-radius: 15px;
-    padding: 8px 15px;
-    display: flex; /* Added to align icons with inputs */
-    align-items: center; /* Vertical center alignment for content */
+    min-height: 44px;
+    margin-bottom: 1rem;
+    background-color: #f4f7f5;
+    border-radius: 12px;
+    padding: 0.5rem 0.9rem;
+    display: flex;
+    align-items: center;
 }
 
-input, select {
-    border: 2px solid #ccc; /* Added subtle border */
+.login input,
+.login select {
+    border: 2px solid #ccc;
     outline: none;
-    width: calc(100% - 30px); /* Adjust width to prevent overflow */
-    padding: 12px 10px; /* Increased padding for better text visibility */
-    font-size: 1rem; /* Increased font size for better readability */
-    border-radius: 5px; /* Rounded corners for a modern look */
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* Subtle inner shadow */
+    width: 100%;
+    padding: 0.65rem 0.6rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: #fff;
 }
 
-input::placeholder {
-    color: #aaa; /* Lighter color for placeholder text */
+.login input::placeholder {
+    color: #94a3b8;
 }
 
-input:focus, select:focus {
-    border-color: #32a852; /* Green border on focus, matching the button color */
-    box-shadow: 0 0 8px rgba(50, 168, 82, 0.2); /* Soft outer glow on focus */
+.login input:focus,
+.login select:focus,
+.login-button:focus-visible,
+.register-link a:focus-visible {
+    border-color: #0f766e;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.25);
+    outline: none;
 }
 
 .icon {
     font-size: 1.2rem;
     color: #666;
-    margin-right: 10px; /* Ensure spacing between icon and input */
+    margin-right: 0.6rem;
+    flex-shrink: 0;
 }
 
 .login-button {
-    background: #32a852;
+    background: #0f766e;
     color: white;
     width: 100%;
     border: none;
-    border-radius: 15px;
-    font-size: 1.2rem;
-    font-weight: 500;
-    padding: 10px 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.75rem 0;
+    margin-top: 0.35rem;
+    margin-bottom: 0.5rem;
     display: block;
+    min-height: 44px;
 }
 
-.login-button:hover {
+.login-button:hover:not(:disabled) {
     cursor: pointer;
-    background-color: #278440;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    background-color: #0d9488;
+}
+
+.login-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .register-link {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 1.25rem;
     font-size: 0.9rem;
     color: #666;
 }
 
+.register-link a,
 .register-link span {
-    color: #32a852;
-    font-weight: bold;
+    color: #0f766e;
+    font-weight: 700;
     cursor: pointer;
+    text-decoration: underline;
 }
 
+.register-link a:hover,
 .register-link span:hover {
-    color: #278440;
+    color: #115e59;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 480px) {
+    .login {
+        margin: 1rem;
+        max-width: none;
+        width: auto;
+        padding: 1.15rem;
+    }
+
+    .text-container h1 {
+        font-size: 1.35rem;
+    }
 }

@@ -1,37 +1,50 @@
 package com.reimbursement.security;
 
+import com.reimbursement.config.CorsProperties;
 import com.reimbursement.constant.AppConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Spring Security RBAC for the enterprise reimbursement workflow.
  *
  * <p>Roles: EMPLOYEE, MANAGER, SENIOR_MANAGER, FINANCE, ADMIN</p>
+ *
+ * <p>CORS is configured only here (not via {@code @CrossOrigin} or a second MVC config).</p>
+ *
+ * <p>CSRF is disabled because the SPA and API are cross-origin; cookie-based CSRF tokens
+ * are not readable by the SPA. Mitigations: strict CORS allow-list, {@code SameSite} cookies,
+ * and session auth. Prefer same-origin reverse-proxy + CSRF for hardened production.</p>
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private final CorsProperties corsProperties;
+
+    public SecurityConfig(CorsProperties corsProperties) {
+        this.corsProperties = corsProperties;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -44,6 +57,20 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/swagger-ui/index.html"
+                        ).permitAll()
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/actuator/info"
+                        ).permitAll()
+                        .requestMatchers("/actuator/metrics", "/actuator/metrics/**")
+                        .hasAnyRole("ADMIN", "FINANCE")
                         .requestMatchers(HttpMethod.POST, AppConstants.API_USERS, AppConstants.API_USERS + "/login")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, AppConstants.API_USERS + "/logout")
@@ -107,19 +134,28 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
-
-    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(AppConstants.CORS_ORIGIN_LOCAL));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedOrigins(resolveOrigins());
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+    private List<String> resolveOrigins() {
+        List<String> configured = corsProperties.getAllowedOrigins();
+        if (configured == null || configured.isEmpty()) {
+            return List.of(AppConstants.CORS_ORIGIN_LOCAL, "http://localhost:8081");
+        }
+        return configured.stream()
+                .flatMap(value -> Arrays.stream(value.split(",")))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

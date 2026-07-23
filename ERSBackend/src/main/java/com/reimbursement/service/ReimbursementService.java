@@ -73,7 +73,7 @@ public class ReimbursementService {
     }
 
     public List<ReimbursementResponse> findAll(UserRole viewerRole) {
-        return reimbursementMapper.toResponseList(reimbursementRepository.findAll(), viewerRole);
+        return reimbursementMapper.toResponseList(reimbursementRepository.findAllWithDetails(), viewerRole);
     }
 
     public List<ReimbursementResponse> findByUserId(int userId, UserRole viewerRole) {
@@ -135,17 +135,6 @@ public class ReimbursementService {
     @Transactional
     public ReimbursementResponse markPaid(int id, Integer actorId, ApprovalDecisionRequest decision) {
         return financeService.markPaid(id, actorId, decision);
-    }
-
-    /** Legacy no-comment approve for older clients. */
-    @Transactional
-    public ReimbursementResponse approveReimbursement(int id) {
-        throw new BadRequestException("Authenticated actor required for approval");
-    }
-
-    @Transactional
-    public ReimbursementResponse denyReimbursement(int id) {
-        throw new BadRequestException("Authenticated actor required for denial");
     }
 
     private ReimbursementResponse resolveDecision(int id, Integer actorId, ApprovalDecisionRequest decision,

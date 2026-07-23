@@ -17,11 +17,14 @@ export const ReimbursementForm: React.FC<ReimbursementFormProps> = ({ onReimburs
     categoryId: '',
   });
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     budgetService.listCategories()
       .then(setCategories)
-      .catch((err) => console.error('Failed to load categories', err));
+      .catch((err) => setError(getErrorMessage(err, 'Failed to load categories')));
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -34,6 +37,9 @@ export const ReimbursementForm: React.FC<ReimbursementFormProps> = ({ onReimburs
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError('');
+    setMessage('');
+    setIsSubmitting(true);
     try {
       const payload = {
         amount: formData.amount,
@@ -42,40 +48,47 @@ export const ReimbursementForm: React.FC<ReimbursementFormProps> = ({ onReimburs
       };
       const created = await reimbursementService.create(payload);
       const escalated = !!created.requiresSeniorReview;
-      alert(
+      setMessage(
         escalated
-          ? 'Submitted for manager review. This claim is flagged for senior manager escalation (amount and/or budget rules).'
+          ? 'Submitted for manager review. This claim is flagged for senior manager escalation.'
           : 'Reimbursement submitted. It is now in Manager Review.'
       );
       setFormData({ amount: '', description: '', categoryId: '' });
       onReimbursementSubmit();
-    } catch (error) {
-      alert(getErrorMessage(error, 'Failed to submit reimbursement'));
-      console.error(error);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to submit reimbursement'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="form-container">
+    <section className="form-container" aria-labelledby="submit-claim-heading">
       <div className="form-content">
-        <h1>Submit Your Reimbursement Request</h1>
+        <h2 id="submit-claim-heading">Submit your reimbursement request</h2>
         <p>Fill out the form below. Claims may escalate by amount threshold or remaining budget.</p>
+        {message ? <p className="form-success" role="status">{message}</p> : null}
+        {error ? <p className="auth-error" role="alert">{error}</p> : null}
         <form onSubmit={handleSubmit}>
           <div className="input-container">
-            <Icons.Money className="icon" />
+            <Icons.Money className="icon" aria-hidden="true" />
+            <label htmlFor="claim-amount" className="sr-only">Amount</label>
             <input
+              id="claim-amount"
               type="number"
               name="amount"
               placeholder="Amount"
               value={formData.amount}
               onChange={handleChange}
               required
-              min="1"
-              step="1"
+              min="0.01"
+              step="0.01"
             />
           </div>
           <div className="input-container">
+            <label htmlFor="claim-category" className="sr-only">Expense category</label>
             <select
+              id="claim-category"
               name="categoryId"
               value={formData.categoryId}
               onChange={handleChange}
@@ -90,19 +103,24 @@ export const ReimbursementForm: React.FC<ReimbursementFormProps> = ({ onReimburs
             </select>
           </div>
           <div className="input-container">
-            <Icons.AlignLeft className="icon" />
+            <Icons.AlignLeft className="icon" aria-hidden="true" />
+            <label htmlFor="claim-description" className="sr-only">Description</label>
             <textarea
+              id="claim-description"
               name="description"
               placeholder="Description"
               value={formData.description}
               onChange={handleChange}
               required
+              maxLength={500}
             />
           </div>
-          <button type="submit">Submit</button>
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Submitting…' : 'Submit'}
+          </button>
         </form>
       </div>
-    </div>
+    </section>
   );
 };
 

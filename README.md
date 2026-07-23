@@ -1,94 +1,226 @@
-## Employee Reimbursement System (ERS)
+# Employee Reimbursement System (ERS)
 
-**Author:** Madasu Rakesh
+**Author:** Madasu Rakesh  
+**Repository:** [FinFlow](https://github.com/rakeshrakhi9392/FinFlow)
 
-Welcome to the Employee Reimbursement System (ERS) repository! This project is a Java Full Stack application designed to streamline the process of submitting and managing reimbursement requests for employees. By simplifying this process, ERS aims to reduce administrative overhead, increase transparency in financial operations, and enhance the overall employee experience in managing expenses.
-
+Enterprise-style full-stack application for submitting, approving, budgeting, and posting employee reimbursements to a vendor/ERP layer.
 
 ![Main Page](images/main-page.png)
 
+---
+
 ## Overview
 
-The ERS application consists of two main components:
-- **Frontend**: Built with React, the frontend provides an intuitive user interface for employees and managers to interact with the reimbursement system.
-- **Backend**: Developed with Spring Boot, the backend handles business logic, data management, and communication with the frontend.
+| Layer | Stack |
+|-------|--------|
+| **Frontend** | React 18, TypeScript, Axios, Recharts |
+| **Backend** | Spring Boot 3.2, Spring Security, Spring Data JPA |
+| **API docs** | springdoc OpenAPI 3 / Swagger UI |
+| **Observability** | Spring Boot Actuator (`/actuator/health`, `/actuator/metrics`) |
+| **Database** | PostgreSQL (local) or **Neon PostgreSQL** (production) |
+| **Deploy** | Docker · Docker Compose · GitHub Actions → **Google Cloud Run** |
+
+---
 
 ## Features
 
 ### Enterprise approval workflow
-- Multi-stage pipeline: **Submitted → Manager Review → Senior Manager Review (if required) → Finance Review → Pending Vendor Confirmation → Vendor Processing → Paid**
-- Configurable escalation by **amount threshold** and **remaining budget**
-- Approval **comments**, **timestamps**, and full **approval history**
-- Timeline UI with status badges and role-specific actions
-- Documented in [WORKFLOW.md](WORKFLOW.md)
+- Pipeline: **Submitted → Manager → Senior Manager (optional) → Finance → Vendor Confirmation → Paid**
+- Escalation by amount threshold and remaining department budget
+- Approval comments, timestamps, and full history / timeline UI  
+- Details: [WORKFLOW.md](WORKFLOW.md)
+
+### Budget engine
+- Remaining-budget checks and configurable escalation
+- Spend applied at finance commitment (vendor confirmation)
+- Role-gated budget dashboard
 
 ### Vendor / ERP integration
-- Pluggable `VendorIntegrationService` with **Mock SAP** adapter (SAP / Oracle / FX stubs ready)
-- Finance approval posts to ERP with **timeout**, **retry**, and error states `PENDING_VENDOR_CONFIRMATION` / `FAILED_VENDOR_SYNC`
-- Vendor dashboard: integration status, last sync, vendor response, retry
-- Architecture: [INTEGRATION.md](INTEGRATION.md)
+- Pluggable `VendorIntegrationService` with **Mock SAP** (SAP / Oracle / FX stubs ready)
+- Timeout, retry, and sync states (`PENDING_VENDOR_CONFIRMATION`, `FAILED_VENDOR_SYNC`)  
+- Details: [INTEGRATION.md](INTEGRATION.md)
 
-### Employee Features
-- **Account Creation**: Employees can create an account to access the system.
-- **Reimbursement Submission**: Employees can submit reimbursement requests.
-- **View Reimbursements**: Employees can track their claims through every workflow stage.
+### Security & RBAC
+- Session cookies (`JSESSIONID`) + BCrypt passwords
+- Roles: `employee`, `manager`, `senior_manager`, `finance`, `admin`
 
-### Manager / Senior Manager / Finance Features
-- Role-specific review queues with approve / deny (and mark paid for finance).
-- Budget dashboard visibility for elevated roles.
+### Production readiness
+- Swagger UI & OpenAPI JSON
+- Actuator health (Cloud Run probes) and metrics
+- Docker images for API and SPA
+- Compose stack for local parity
+- GitHub Actions deploy to Cloud Run + Neon  
+- Runbook: [DEPLOYMENT.md](DEPLOYMENT.md) · Diagrams: [ARCHITECTURE.md](ARCHITECTURE.md)
 
-### Admin Features
-- Configure workflow escalation rules.
-- Act across stages and manage users.
+---
 
-### Validation & Security
-- **Spring Security RBAC** with roles: `employee`, `manager`, `senior_manager`, `finance`, `admin`.
-- Session-based authentication; passwords hashed with BCrypt.
-- Endpoints and workflow transitions enforce role permissions.
+## Architecture (summary)
 
-### Integration of Frontend and Backend
-- **API Communication**: The frontend uses Axios to make HTTP requests to the backend. These requests include credentials where necessary, and the backend uses session cookies to maintain user state across requests.
-- **Secure Data Flow**: The communication between the frontend and the backend is secured through HTTPS, ensuring that all data transferred remains encrypted and secure from interceptors.
-- **Frontend Authentication Checks**: The frontend has mechanisms to check whether the user is logged in before rendering protected routes. It interacts with the backend to fetch authentication status and user details, which are then stored in the global context or local storage for quick access and to manage user sessions effectively.
-- **Error Handling and User Feedback**: Both frontend and backend include robust error handling mechanisms to deal with authentication errors, such as unauthorized access attempts or session timeouts. Users are promptly informed with appropriate messages guiding them to re-authenticate or correct their actions.
+```text
+React SPA ──HTTPS + session cookie──► Spring Boot on Cloud Run
+                                              │
+                                              ▼
+                                       Neon PostgreSQL
+                                              ▲
+Finance approval ──► Resilient Vendor Adapter (Mock SAP / ERP)
+```
 
-## Technology Stack
-- **Frontend**: React, Axios for API calls
-- **Backend**: Spring Boot with Spring Security for secure API endpoints, Spring Data JPA for database interactions
-- **Database**: PostgreSQL
+Full diagrams and module explanations: [ARCHITECTURE.md](ARCHITECTURE.md).
 
-## Database Architecture
+---
 
-The database architecture includes tables for users, reimbursements, and other necessary entities. Customize table columns and constraints as needed, ensuring proper error handling.
+## Quick start (local)
+
+### Prerequisites
+- JDK 17+, Maven  
+- Node.js 20+  
+- PostgreSQL **or** Docker  
+
+### Backend
+
+```bash
+cd ERSBackend
+./mvnw spring-boot:run
+```
+
+Defaults: `jdbc:postgresql://localhost:5432/reimbursement` (override with env vars — see `.env.example`).
+
+### Frontend
+
+```bash
+cd ers-frontend
+npm install
+npm start
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### Docker Compose
+
+```bash
+cp .env.example .env
+docker compose --profile local-db up --build
+```
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:8081 |
+| API | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| Health | http://localhost:8080/actuator/health |
+
+---
+
+## API documentation & ops endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `/swagger-ui.html` | Interactive Swagger UI |
+| `/v3/api-docs` | OpenAPI 3 specification |
+| `/actuator/health` | Health (public) |
+| `/actuator/info` | Build/app info (public) |
+| `/actuator/metrics` | Metrics (ADMIN / FINANCE session) |
+
+Authenticate in Swagger by calling `POST /users/login` first (browser will store the session cookie).
+
+---
+
+## Authentication
+
+1. Register: `POST /users`  
+2. Login: `POST /users/login` → server creates HTTP session and returns user profile  
+3. Subsequent calls send `JSESSIONID` via Axios `withCredentials`  
+4. Logout: `POST /users/logout`  
+
+UI route guards use a `sessionStorage` mirror; **authoritative auth is the server session**.  
+Cross-origin production (SPA ≠ API host) uses `Secure` + `SameSite=None` cookies and CORS allow-listing — see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+---
+
+## Workflow
+
+Claims move through manager → optional senior manager → finance → vendor posting → paid. Admins configure escalation in `workflow_config`. See [WORKFLOW.md](WORKFLOW.md).
+
+---
+
+## Budget engine
+
+`EscalationPolicyEngine` / `BudgetPolicyEngine` evaluate amount thresholds and remaining department budget at submit time; finance approval applies spend when entering vendor confirmation.
+
+---
+
+## Vendor integration
+
+`FinanceService` talks only to the `VendorIntegrationService` port. `ResilientVendorIntegrationService` adds timeouts and retries around the configured adapter (`ERS_VENDOR_PROVIDER`). See [INTEGRATION.md](INTEGRATION.md).
+
+---
+
+## Deployment
+
+| Target | How |
+|--------|-----|
+| Local containers | `docker compose --profile local-db up --build` |
+| Database (prod) | Neon PostgreSQL JDBC + SSL |
+| API (prod) | GitHub Actions → Artifact Registry → **Google Cloud Run** |
+| Frontend (prod) | Build with `REACT_APP_API_BASE_URL` pointing at Cloud Run; host via Nginx/CDN |
+
+Step-by-step secrets, Neon setup, and Cloud Run flags: **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
+---
+
+## Database
+
+ER diagram:
 
 ![ER Diagram](images/er-diagram.png)
 
+Production schema defaults to Neon’s `public` schema. Local default schema can be `reimbursement_schema` (see `application.properties`).
 
+---
 
 ## Requirements
 
-For detailed project requirements, please refer to [Project Requirements](requirements.md).
+Classic functional requirements: [requirements.md](requirements.md).
 
-## Getting Started
+---
 
-To get started with the ERS application, follow these steps:
+## Fork attribution
 
-1. Clone the repository to your local machine.
-2. Set up the backend:
-   - Navigate to the `ERSBackend` directory.
-   - Build and run the Spring Boot application.
-3. Set up the frontend:
-   - Navigate to the `ers-frontend` directory.
-   - Install dependencies with `npm install`.
-   - Start the React development server with `npm start`.
-4. Access the application in your web browser at `http://localhost:3000`.
+This project is an original full-stack implementation by **Madasu Rakesh**, published as **FinFlow** (`https://github.com/rakeshrakhi9392/FinFlow`).
+
+It follows the widely taught **Employee Reimbursement System (ERS)** training problem domain (employee expense claims with manager review). That domain is a common educational brief used across many bootcamps and courses; this repository is **not** a verbatim copy of a single upstream codebase.
+
+**Substantial original / extended work in this repository includes:**
+
+- Multi-stage enterprise workflow with escalation and approval history  
+- Budget / escalation policy engines and budget dashboard  
+- Pluggable vendor/ERP integration with resilience (Mock SAP)  
+- Role model expanded to senior manager, finance, and admin  
+- Production packaging: OpenAPI, Actuator, Docker, Compose, GitHub Actions, Cloud Run + Neon documentation  
+
+If you fork or reuse this work, retain the copyright notice in [LICENSE](LICENSE) and credit **Madasu Rakesh**.
+
+---
+
+## Documentation index
+
+| Document | Contents |
+|----------|----------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | System & sequence diagrams, module map |
+| [REVIEW.md](REVIEW.md) | Production review: architecture, tradeoffs, limitations, roadmap |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Neon, Docker, Cloud Run, GitHub Actions |
+| [WORKFLOW.md](WORKFLOW.md) | Approval lifecycle & APIs |
+| [INTEGRATION.md](INTEGRATION.md) | Vendor/ERP adapters |
+| [requirements.md](requirements.md) | Functional requirements |
+
+---
 
 ## Author
 
-Madasu Rakesh
+**Madasu Rakesh**
 
 ## License
 
-Copyright (c) 2026 Madasu Rakesh
+Copyright (c) 2026 Madasu Rakesh  
 
-This project is licensed under the [MIT License](LICENSE).
+Licensed under the [MIT License](LICENSE).

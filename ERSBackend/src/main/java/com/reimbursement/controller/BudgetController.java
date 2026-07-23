@@ -6,7 +6,6 @@ import com.reimbursement.dto.response.DepartmentBudgetResponse;
 import com.reimbursement.enums.FiscalQuarter;
 import com.reimbursement.service.BudgetService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,12 +17,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping(AppConstants.API_BUDGETS)
-@CrossOrigin(origins = { AppConstants.CORS_ORIGIN_LOCAL }, allowedHeaders = "*", allowCredentials = "true")
-public class BudgetDashboardController {
+public class BudgetController {
 
     private final BudgetService budgetService;
 
-    public BudgetDashboardController(BudgetService budgetService) {
+    public BudgetController(BudgetService budgetService) {
         this.budgetService = budgetService;
     }
 
@@ -31,20 +29,16 @@ public class BudgetDashboardController {
     public ResponseEntity<BudgetSummaryResponse> getBudgetSummary(
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) FiscalQuarter quarter) {
-        LocalDate today = LocalDate.now();
-        int fiscalYear = year != null ? year : FiscalQuarter.fiscalYearOf(today);
-        FiscalQuarter fiscalQuarter = quarter != null ? quarter : FiscalQuarter.fromDate(today);
-        return ResponseEntity.ok(budgetService.getSummary(fiscalYear, fiscalQuarter));
+        Period period = resolvePeriod(year, quarter);
+        return ResponseEntity.ok(budgetService.getSummary(period.year(), period.quarter()));
     }
 
     @GetMapping("/departments")
     public ResponseEntity<List<DepartmentBudgetResponse>> getDepartmentSpend(
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) FiscalQuarter quarter) {
-        LocalDate today = LocalDate.now();
-        int fiscalYear = year != null ? year : FiscalQuarter.fiscalYearOf(today);
-        FiscalQuarter fiscalQuarter = quarter != null ? quarter : FiscalQuarter.fromDate(today);
-        return ResponseEntity.ok(budgetService.getDepartmentSpend(fiscalYear, fiscalQuarter));
+        Period period = resolvePeriod(year, quarter);
+        return ResponseEntity.ok(budgetService.getDepartmentSpend(period.year(), period.quarter()));
     }
 
     @GetMapping("/departments/{departmentId}")
@@ -52,9 +46,18 @@ public class BudgetDashboardController {
             @PathVariable Long departmentId,
             @RequestParam(required = false) Integer year,
             @RequestParam(required = false) FiscalQuarter quarter) {
+        Period period = resolvePeriod(year, quarter);
+        return ResponseEntity.ok(
+                budgetService.getDepartmentBudget(departmentId, period.year(), period.quarter()));
+    }
+
+    private Period resolvePeriod(Integer year, FiscalQuarter quarter) {
         LocalDate today = LocalDate.now();
         int fiscalYear = year != null ? year : FiscalQuarter.fiscalYearOf(today);
         FiscalQuarter fiscalQuarter = quarter != null ? quarter : FiscalQuarter.fromDate(today);
-        return ResponseEntity.ok(budgetService.getDepartmentBudget(departmentId, fiscalYear, fiscalQuarter));
+        return new Period(fiscalYear, fiscalQuarter);
+    }
+
+    private record Period(int year, FiscalQuarter quarter) {
     }
 }

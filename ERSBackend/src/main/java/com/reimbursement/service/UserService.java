@@ -1,10 +1,12 @@
 package com.reimbursement.service;
 
+import com.reimbursement.constant.AppConstants;
 import com.reimbursement.dto.request.LoginRequest;
 import com.reimbursement.dto.request.RegistrationRequest;
 import com.reimbursement.dto.response.UserLoginResponse;
 import com.reimbursement.entity.Department;
 import com.reimbursement.entity.User;
+import com.reimbursement.enums.UserRole;
 import com.reimbursement.exception.AuthenticationException;
 import com.reimbursement.exception.BadRequestException;
 import com.reimbursement.exception.ResourceNotFoundException;
@@ -36,10 +38,11 @@ public class UserService {
 
     @Transactional
     public UserLoginResponse registerUser(RegistrationRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(request.getUsername().trim())) {
             throw new BadRequestException("Username already exists");
         }
-        User user = userMapper.toEntity(request);
+        UserRole role = resolveSelfRegistrationRole(request.getRole());
+        User user = userMapper.toEntity(request, role);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setDepartment(resolveDepartment(request.getDepartmentId()));
         User saved = userRepository.save(user);
@@ -48,9 +51,9 @@ public class UserService {
 
     public UserLoginResponse loginUser(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new AuthenticationException("Login Failed!"));
+                .orElseThrow(() -> new AuthenticationException("Invalid username or password"));
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new AuthenticationException("Login Failed!");
+            throw new AuthenticationException("Invalid username or password");
         }
         return userMapper.toLoginResponse(user);
     }
@@ -58,8 +61,23 @@ public class UserService {
     @Transactional
     public void deleteUser(int userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BadRequestException("User with id " + userId + " does not exist"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + userId + " does not exist"));
         userRepository.delete(user);
+    }
+
+    /**
+     * Public registration may only create employee or manager accounts.
+     * Elevated roles (finance, senior_manager, admin) must be provisioned out-of-band.
+     */
+    private UserRole resolveSelfRegistrationRole(String role) {
+        if (role == null || role.isBlank()) {
+            return UserRole.fromValue(AppConstants.DEFAULT_ROLE);
+        }
+        UserRole parsed = UserRole.fromValue(role);
+        if (parsed != UserRole.EMPLOYEE && parsed != UserRole.MANAGER) {
+            throw new BadRequestException("Self-registration is limited to employee or manager roles");
+        }
+        return parsed;
     }
 
     private Department resolveDepartment(Long departmentId) {

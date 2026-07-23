@@ -125,12 +125,12 @@ export const ApprovalWorkspace: React.FC<ApprovalWorkspaceProps> = ({
   };
 
   return (
-    <div className="approval-workspace">
+    <main className="approval-workspace">
       <header className="workspace-hero">
         <p className="role-pill">{roleLabel}</p>
         <h1>{title}</h1>
         <p>{subtitle}</p>
-        <nav className="workspace-nav">
+        <nav className="workspace-nav" aria-label="Dashboard navigation">
           {showBudgetLink && <Link to={ROUTES.budgetDashboard}>Budget Dashboard</Link>}
           {showVendorLink && <Link to={ROUTES.vendorDashboard}>Vendor Dashboard</Link>}
           <Link to={ROUTES.logout}>Logout</Link>
@@ -138,8 +138,8 @@ export const ApprovalWorkspace: React.FC<ApprovalWorkspaceProps> = ({
       </header>
 
       {showAdminConfig && (
-        <section className="config-panel">
-          <h2>Configurable approval levels</h2>
+        <section className="config-panel" aria-labelledby="config-heading">
+          <h2 id="config-heading">Configurable approval levels</h2>
           <div className="config-row">
             <label>
               Senior escalation amount ($)
@@ -160,35 +160,37 @@ export const ApprovalWorkspace: React.FC<ApprovalWorkspaceProps> = ({
             </label>
             <button type="button" onClick={saveConfig}>Save rules</button>
           </div>
-          {configMessage && <p className="config-msg">{configMessage}</p>}
+          {configMessage && <p className="config-msg" role="status">{configMessage}</p>}
         </section>
       )}
 
-      <section className="queue-section">
+      <section className="queue-section" aria-labelledby="queue-heading">
         <div className="queue-heading">
-          <h2>{fetchMode === 'all' ? 'All claims' : 'Your action queue'}</h2>
+          <h2 id="queue-heading">{fetchMode === 'all' ? 'All claims' : 'Your action queue'}</h2>
           <button type="button" className="ghost" onClick={load}>Refresh</button>
         </div>
         {isLoading ? (
-          <p>Loading...</p>
+          <p aria-live="polite">Loading…</p>
         ) : error ? (
-          <p className="error-text">{error}</p>
+          <p className="error-text" role="alert">{error}</p>
         ) : claims.length === 0 ? (
           <p className="empty-queue">No claims require your action right now.</p>
         ) : (
-          claims.map((claim) => (
-            <ClaimCard
-              key={claim.reimbursementId}
-              claim={claim}
-              onApprove={handleApprove}
-              onDeny={handleDeny}
-              onMarkPaid={handleMarkPaid}
-              onRetryVendor={handleRetryVendor}
-            />
-          ))
+          <div aria-live="polite">
+            {claims.map((claim) => (
+              <ClaimCard
+                key={claim.reimbursementId}
+                claim={claim}
+                onApprove={handleApprove}
+                onDeny={handleDeny}
+                onMarkPaid={handleMarkPaid}
+                onRetryVendor={handleRetryVendor}
+              />
+            ))}
+          </div>
         )}
       </section>
-    </div>
+    </main>
   );
 };
 

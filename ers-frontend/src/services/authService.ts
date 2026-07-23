@@ -9,8 +9,15 @@ export const authService = {
   },
 
   async register(payload: RegistrationPayload): Promise<string> {
-    const response = await apiClient.post<string>(API_PATHS.users, payload);
-    return typeof response.data === 'string' ? response.data : 'Registration successful';
+    const response = await apiClient.post<{ message?: string } | string>(API_PATHS.users, payload);
+    const data = response.data;
+    if (typeof data === 'string' && data.trim()) {
+      return data;
+    }
+    if (data && typeof data === 'object' && typeof data.message === 'string') {
+      return data.message;
+    }
+    return 'Registration successful';
   },
 
   async logout(): Promise<void> {

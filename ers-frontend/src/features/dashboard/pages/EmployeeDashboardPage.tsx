@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ReimbursementForm } from '../../reimbursement/components/ReimbursementForm';
 import { ClaimCard } from '../../reimbursement/components/ClaimCard';
@@ -6,10 +6,6 @@ import { useReimbursements } from '../../reimbursement/hooks/useReimbursements';
 import { useAppContext } from '../../../context/AppContext';
 import { ROUTES } from '../../../shared/utils/constants';
 import './EmployeeDashboard.css';
-
-interface EmployeeDashboardProps {
-  setUserRole: (role: string) => void;
-}
 
 const FILTER_KEYS = [
   'MANAGER_REVIEW',
@@ -20,7 +16,20 @@ const FILTER_KEYS = [
   'DENIED',
 ] as const;
 
-const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ setUserRole }) => {
+function normalizeStatus(status: string): string {
+  if (status === 'MANAGER_APPROVAL' || status === 'PENDING' || status === 'Pending' || status === 'SUBMITTED') {
+    return 'MANAGER_REVIEW';
+  }
+  if (status === 'REQUIRES_SENIOR_APPROVAL') {
+    return 'SENIOR_MANAGER_REVIEW';
+  }
+  if (status === 'APPROVED' || status === 'Approved') {
+    return 'PAID';
+  }
+  return status;
+}
+
+const EmployeeDashboard: React.FC = () => {
   const { user } = useAppContext();
   const [filters, setFilters] = useState<Record<(typeof FILTER_KEYS)[number], boolean>>({
     MANAGER_REVIEW: true,
@@ -31,12 +40,6 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ setUserRole }) =>
     DENIED: true,
   });
 
-  useEffect(() => {
-    if (user?.role) {
-      setUserRole(user.role);
-    }
-  }, [user, setUserRole]);
-
   const { reimbursements, isLoading, error, refresh } = useReimbursements(user?.userId);
 
   const handleCheckboxChange = (status: (typeof FILTER_KEYS)[number]) => {
@@ -44,28 +47,19 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ setUserRole }) =>
   };
 
   const filteredReimbursements = reimbursements.filter((reimbursement) => {
-    const status = String(reimbursement.status);
-    const normalized =
-      status === 'MANAGER_APPROVAL' || status === 'PENDING' || status === 'Pending'
-        ? 'MANAGER_REVIEW'
-        : status === 'REQUIRES_SENIOR_APPROVAL'
-          ? 'SENIOR_MANAGER_REVIEW'
-          : status === 'APPROVED' || status === 'Approved'
-            ? 'PAID'
-            : status === 'SUBMITTED'
-              ? 'MANAGER_REVIEW'
-              : status;
+    const normalized = normalizeStatus(String(reimbursement.status));
     return FILTER_KEYS.some((key) => filters[key] && normalized === key);
   });
 
   return (
-    <div className="employee-dashboard">
+    <main className="employee-dashboard">
       <h1>Employee Dashboard</h1>
       <p className="employee-intro">
         Track your claims through manager, senior, finance, and vendor stages.
       </p>
       <ReimbursementForm onReimbursementSubmit={refresh} />
-      <div className="filter-row">
+      <fieldset className="filter-row">
+        <legend className="sr-only">Filter claims by status</legend>
         {FILTER_KEYS.map((status) => (
           <label key={status}>
             <input
@@ -76,21 +70,23 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ setUserRole }) =>
             {status.replace(/_/g, ' ')}
           </label>
         ))}
-      </div>
-      <h2>Your Reimbursement Requests</h2>
+      </fieldset>
+      <h2>Your reimbursement requests</h2>
       {isLoading ? (
-        <p>Loading...</p>
+        <p aria-live="polite">Loading…</p>
       ) : error ? (
-        <p>{error}</p>
+        <p className="auth-error" role="alert">{error}</p>
       ) : filteredReimbursements.length === 0 ? (
         <p>No reimbursement requests to display.</p>
       ) : (
-        filteredReimbursements.map((item) => (
-          <ClaimCard key={item.reimbursementId} claim={item} showActions={false} />
-        ))
+        <div className="claim-list" aria-live="polite">
+          {filteredReimbursements.map((item) => (
+            <ClaimCard key={item.reimbursementId} claim={item} showActions={false} />
+          ))}
+        </div>
       )}
       <p className="register-link"><Link to={ROUTES.logout}>Logout</Link></p>
-    </div>
+    </main>
   );
 };
 

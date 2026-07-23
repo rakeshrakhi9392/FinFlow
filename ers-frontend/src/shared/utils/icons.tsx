@@ -10,7 +10,7 @@ import {
   FaUser,
 } from 'react-icons/fa';
 
-type IconProps = { className?: string };
+type IconProps = { className?: string; 'aria-hidden'?: boolean | 'true' | 'false' };
 
 /**
  * react-icons + @types/react version mismatch can mark icons as invalid JSX.

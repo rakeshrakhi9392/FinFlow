@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../shared/utils/constants';
+import { API_BASE_URL, ROUTES, SESSION_USER_KEY } from '../shared/utils/constants';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -11,7 +11,18 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error)
+  (error) => {
+    if (error?.response?.status === 401) {
+      sessionStorage.removeItem(SESSION_USER_KEY);
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        if (path !== ROUTES.login && path !== ROUTES.register) {
+          window.location.assign(ROUTES.login);
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default apiClient;

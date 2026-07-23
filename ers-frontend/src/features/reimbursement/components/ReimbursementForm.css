@@ -3,15 +3,14 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-radius: 5px;
+    border-radius: 12px;
     border: none;
-    padding: 20px;
+    padding: 1.25rem;
     background-color: #ffffff;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    max-width: 400px;
-    margin: 5% auto 0; /* Adjusted top margin to match the login form */
-    position: relative; /* Ensures the form is relative to the viewport height */
-    z-index: 2; /* Keeps the form above the background image */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 440px;
+    margin: 1.5rem auto 0;
+    width: 100%;
 }
 
 .form-content {
@@ -19,66 +18,86 @@
     text-align: center;
 }
 
-.input-container {
-    height: 40px;
-    margin-bottom: 20px;
+.form-success {
+    color: #065f46;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 8px;
+    padding: 0.65rem 0.75rem;
+    margin: 0 0 1rem;
+    font-size: 0.9rem;
+}
+
+.form-container .input-container {
+    min-height: 44px;
+    height: auto;
+    margin-bottom: 1rem;
     background-color: #ffffff;
-    border-radius: 15px;
-    padding: 8px 15px;
+    border-radius: 12px;
+    padding: 0.5rem 0.9rem;
     display: flex;
     align-items: center;
 }
 
-input, textarea, select {
+.form-container input,
+.form-container textarea,
+.form-container select {
     border: 2px solid #ccc;
     outline: none;
     width: 100%;
-    padding: 12px 10px;
+    padding: 0.65rem 0.6rem;
     font-size: 1rem;
-    border-radius: 5px;
+    border-radius: 6px;
     background: #ffffff;
-    box-shadow: none;
 }
 
-textarea {
-    min-height: 50px; /* Minimum height for textarea */
-    resize: vertical; /* Allows resizing only vertically */
+.form-container textarea {
+    min-height: 72px;
+    resize: vertical;
 }
 
-
-input:focus, textarea:focus {
-    border-color: #32a852;
-    box-shadow: none;
-}
-.input-container:hover {
-    box-shadow: none; /* Rimuove l'ombra al passaggio del mouse */
-}
-
-input:hover, textarea:hover {
-    box-shadow: none; /* Rimuove l'ombra al passaggio del mouse */
+.form-container input:focus,
+.form-container textarea:focus,
+.form-container select:focus,
+.form-container button:focus-visible {
+    border-color: #0f766e;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.25);
+    outline: none;
 }
 
-.icon {
+.form-container .icon {
     font-size: 1.2rem;
     color: #666;
-    margin-right: 10px;
+    margin-right: 0.6rem;
+    flex-shrink: 0;
 }
 
-button {
-    background: #32a852;
+.form-container button {
+    background: #0f766e;
     color: white;
     width: 100%;
     border: none;
-    border-radius: 15px;
-    font-size: 1.2rem;
-    font-weight: 500;
-    padding: 10px 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.75rem 0;
+    margin-top: 0.35rem;
+    min-height: 44px;
 }
 
-button:hover {
+.form-container button:hover:not(:disabled) {
     cursor: pointer;
-    background-color: #278440;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    background-color: #0d9488;
+}
+
+.form-container button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+    .form-container {
+        margin: 1rem 0 0;
+        max-width: none;
+    }
 }

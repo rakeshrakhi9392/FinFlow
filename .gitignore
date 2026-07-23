@@ -54,6 +54,8 @@ yarn.lock
 
 # Environment variables file
 .env
+.env.*
+!.env.example
 
 # dependencies
 /node_modules

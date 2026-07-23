@@ -3,6 +3,7 @@ package com.reimbursement.controller;
 import com.reimbursement.constant.AppConstants;
 import com.reimbursement.dto.request.LoginRequest;
 import com.reimbursement.dto.request.RegistrationRequest;
+import com.reimbursement.dto.response.MessageResponse;
 import com.reimbursement.dto.response.UserLoginResponse;
 import com.reimbursement.security.SessionAuthService;
 import com.reimbursement.service.UserService;
@@ -11,7 +12,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(AppConstants.API_USERS)
-@CrossOrigin(origins = { AppConstants.CORS_ORIGIN_LOCAL }, allowedHeaders = "*", allowCredentials = "true")
 public class UserController {
 
     private final UserService userService;
@@ -33,10 +32,10 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<String> registerUser(@Valid @RequestBody RegistrationRequest request) {
-        userService.registerUser(request);
+    public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody RegistrationRequest request) {
+        UserLoginResponse created = userService.registerUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("User " + request.getUsername() + " was created successfully!");
+                .body(new MessageResponse("User " + created.getUsername() + " was created successfully"));
     }
 
     @PostMapping("/login")
@@ -48,15 +47,15 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpSession session) {
+    public ResponseEntity<MessageResponse> logout(HttpSession session) {
         sessionAuthService.clearSession(session);
-        return ResponseEntity.ok("Logged out");
+        return ResponseEntity.ok(new MessageResponse("Logged out"));
     }
 
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> deleteUser(@PathVariable int userId) {
+    public ResponseEntity<MessageResponse> deleteUser(@PathVariable int userId) {
         userService.deleteUser(userId);
-        return ResponseEntity.ok("User " + userId + " was deleted successfully!");
+        return ResponseEntity.ok(new MessageResponse("User " + userId + " was deleted successfully"));
     }
 }

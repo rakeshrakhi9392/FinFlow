@@ -52,9 +52,33 @@
   border-bottom: 1px solid transparent;
 }
 
-.workspace-nav a:hover {
+.workspace-nav a:hover,
+.workspace-nav a:focus-visible {
   border-bottom-color: #99f6e4;
+  outline: none;
 }
+
+@media (max-width: 640px) {
+  .approval-workspace {
+    margin: 1rem auto;
+    padding: 0 0.75rem 1.5rem;
+  }
+
+  .workspace-hero {
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
+  }
+
+  .workspace-hero h1 {
+    font-size: 1.35rem;
+  }
+
+  .config-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 
 .config-panel,
 .queue-section {

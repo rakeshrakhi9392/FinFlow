@@ -9,7 +9,6 @@ import com.reimbursement.repository.BudgetRepository;
 import com.reimbursement.repository.DepartmentRepository;
 import com.reimbursement.repository.ExpenseCategoryRepository;
 import com.reimbursement.repository.UserRepository;
-import com.reimbursement.service.WorkflowConfigService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,10 +19,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Seeds enterprise finance reference data, workflow config, and demo users.
+ * Seeds departments, categories, budgets, and demo users for local/demo environments.
+ * Disabled for {@code prod} and {@code test} profiles — production must provision data explicitly.
  */
 @Component
-@Profile("!test")
+@Profile("!test & !prod")
 public class FinanceDataInitializer implements CommandLineRunner {
 
     private final DepartmentRepository departmentRepository;
@@ -31,27 +31,22 @@ public class FinanceDataInitializer implements CommandLineRunner {
     private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final WorkflowConfigService workflowConfigService;
 
     public FinanceDataInitializer(DepartmentRepository departmentRepository,
                                   ExpenseCategoryRepository expenseCategoryRepository,
                                   BudgetRepository budgetRepository,
                                   UserRepository userRepository,
-                                  PasswordEncoder passwordEncoder,
-                                  WorkflowConfigService workflowConfigService) {
+                                  PasswordEncoder passwordEncoder) {
         this.departmentRepository = departmentRepository;
         this.expenseCategoryRepository = expenseCategoryRepository;
         this.budgetRepository = budgetRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.workflowConfigService = workflowConfigService;
     }
 
     @Override
     @Transactional
     public void run(String... args) {
-        workflowConfigService.ensureDefaultConfig();
-
         if (departmentRepository.count() > 0) {
             seedDemoUsersIfMissing();
             return;

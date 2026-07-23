@@ -10,14 +10,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserMapper {
 
-    public User toEntity(RegistrationRequest request) {
+    /**
+     * Maps registration fields except password (encoded in {@code UserService}) and role
+     * (validated and applied in {@code UserService}).
+     */
+    public User toEntity(RegistrationRequest request, UserRole role) {
         User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
+        user.setUsername(request.getUsername().trim());
         user.setFirstName(resolveFirstName(request.getFirstName()));
         user.setLastName(resolveLastName(request.getLastName()));
-        user.setRole(resolveRole(request.getRole()));
-        user.setEmail(request.getEmail());
+        user.setRole(role.getValue());
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            user.setEmail(request.getEmail().trim());
+        }
         return user;
     }
 
@@ -25,18 +30,11 @@ public class UserMapper {
         return new UserLoginResponse(user.getUserId(), user.getUsername(), user.getRole());
     }
 
-    private String resolveRole(String role) {
-        if (role == null || role.isBlank()) {
-            return AppConstants.DEFAULT_ROLE;
-        }
-        return UserRole.fromValue(role).getValue();
-    }
-
     private String resolveFirstName(String firstName) {
-        return (firstName == null || firstName.isBlank()) ? AppConstants.DEFAULT_FIRST_NAME : firstName;
+        return (firstName == null || firstName.isBlank()) ? AppConstants.DEFAULT_FIRST_NAME : firstName.trim();
     }
 
     private String resolveLastName(String lastName) {
-        return (lastName == null || lastName.isBlank()) ? AppConstants.DEFAULT_LAST_NAME : lastName;
+        return (lastName == null || lastName.isBlank()) ? AppConstants.DEFAULT_LAST_NAME : lastName.trim();
     }
 }

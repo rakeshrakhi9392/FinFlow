@@ -8,7 +8,6 @@ import com.reimbursement.service.FinanceService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +25,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping(AppConstants.API_VENDOR)
-@CrossOrigin(origins = { AppConstants.CORS_ORIGIN_LOCAL }, allowedHeaders = "*", allowCredentials = "true")
 public class VendorIntegrationController {
 
     private final FinanceService financeService;

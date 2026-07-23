@@ -12,6 +12,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
@@ -25,7 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "reimbursement_requests")
+@Table(
+        name = "reimbursement_requests",
+        indexes = {
+                @Index(name = "idx_reimb_status", columnList = "status"),
+                @Index(name = "idx_reimb_user", columnList = "user_id"),
+                @Index(name = "idx_reimb_date_submitted", columnList = "dateSubmitted")
+        }
+)
 public class Reimbursement {
 
     @Id
