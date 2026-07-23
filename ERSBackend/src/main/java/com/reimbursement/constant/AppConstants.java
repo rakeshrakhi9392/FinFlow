@@ -21,4 +21,5 @@ public final class AppConstants {
     public static final String API_CATEGORIES = "/api/categories";
     public static final String API_DEPARTMENTS = "/api/departments";
     public static final String API_WORKFLOW = "/api/workflow";
+    public static final String API_VENDOR = "/api/vendor";
 }

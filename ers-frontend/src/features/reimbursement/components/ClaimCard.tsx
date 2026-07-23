@@ -11,6 +11,7 @@ interface ClaimCardProps {
   onApprove?: (id: number, comment: string) => Promise<void>;
   onDeny?: (id: number, comment: string) => Promise<void>;
   onMarkPaid?: (id: number, comment: string) => Promise<void>;
+  onRetryVendor?: (id: number) => Promise<void>;
   showActions?: boolean;
 }
 
@@ -19,6 +20,7 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
   onApprove,
   onDeny,
   onMarkPaid,
+  onRetryVendor,
   showActions = true,
 }) => {
   const [claim, setClaim] = useState(initialClaim);
@@ -80,6 +82,12 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
             {claim.requiresSeniorReview && <span className="flag escalate">Senior path</span>}
             {claim.escalatedByAmount && <span className="flag amount">Amount escalation</span>}
             {claim.escalatedByBudget && <span className="flag budget">Budget escalation</span>}
+            {claim.accountingDocument && (
+              <span className="flag amount">Doc {claim.accountingDocument}</span>
+            )}
+            {claim.vendorSyncStatus === 'FAILED_VENDOR_SYNC' && (
+              <span className="flag escalate">Vendor sync failed</span>
+            )}
           </div>
         </div>
         <button type="button" className="ghost-btn" onClick={toggleExpanded}>
@@ -129,6 +137,23 @@ export const ClaimCard: React.FC<ClaimCardProps> = ({
             {actions.includes('MARK_PAID') && (
               <button type="button" className="paid" disabled={busy} onClick={() => run(onMarkPaid)}>
                 Mark Paid
+              </button>
+            )}
+            {actions.includes('RETRY_VENDOR_SYNC') && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={async () => {
+                  if (!onRetryVendor) return;
+                  setBusy(true);
+                  try {
+                    await onRetryVendor(id);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                Retry Vendor Sync
               </button>
             )}
           </div>

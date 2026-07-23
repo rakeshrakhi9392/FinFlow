@@ -9,6 +9,7 @@ import SeniorDashboard from './features/dashboard/pages/SeniorDashboardPage';
 import FinanceDashboard from './features/dashboard/pages/FinanceDashboardPage';
 import AdminDashboard from './features/dashboard/pages/AdminDashboardPage';
 import BudgetDashboard from './features/dashboard/pages/BudgetDashboardPage';
+import VendorDashboard from './features/dashboard/pages/VendorDashboardPage';
 import { dashboardRouteForRole, ROUTES } from './shared/utils/constants';
 import './App.css';
 
@@ -36,6 +37,7 @@ const App: React.FC = () => {
           <Route path={ROUTES.financeDashboard} element={<FinanceDashboard />} />
           <Route path={ROUTES.adminDashboard} element={<AdminDashboard />} />
           <Route path={ROUTES.budgetDashboard} element={<BudgetDashboard />} />
+          <Route path={ROUTES.vendorDashboard} element={<VendorDashboard />} />
           <Route path={ROUTES.home} element={renderMainRoute()} />
         </Routes>
       </Router>

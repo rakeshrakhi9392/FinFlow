@@ -16,11 +16,17 @@ The ERS application consists of two main components:
 ## Features
 
 ### Enterprise approval workflow
-- Multi-stage pipeline: **Submitted → Manager Review → Senior Manager Review (if required) → Finance Review → Vendor Processing → Paid**
+- Multi-stage pipeline: **Submitted → Manager Review → Senior Manager Review (if required) → Finance Review → Pending Vendor Confirmation → Vendor Processing → Paid**
 - Configurable escalation by **amount threshold** and **remaining budget**
 - Approval **comments**, **timestamps**, and full **approval history**
 - Timeline UI with status badges and role-specific actions
 - Documented in [WORKFLOW.md](WORKFLOW.md)
+
+### Vendor / ERP integration
+- Pluggable `VendorIntegrationService` with **Mock SAP** adapter (SAP / Oracle / FX stubs ready)
+- Finance approval posts to ERP with **timeout**, **retry**, and error states `PENDING_VENDOR_CONFIRMATION` / `FAILED_VENDOR_SYNC`
+- Vendor dashboard: integration status, last sync, vendor response, retry
+- Architecture: [INTEGRATION.md](INTEGRATION.md)
 
 ### Employee Features
 - **Account Creation**: Employees can create an account to access the system.

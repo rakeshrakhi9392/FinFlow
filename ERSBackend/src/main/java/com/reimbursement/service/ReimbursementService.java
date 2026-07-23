@@ -46,6 +46,7 @@ public class ReimbursementService {
     private final BudgetService budgetService;
     private final EscalationPolicyEngine escalationPolicyEngine;
     private final WorkflowConfigService workflowConfigService;
+    private final FinanceService financeService;
 
     public ReimbursementService(ReimbursementRepository reimbursementRepository,
                                 UserRepository userRepository,
@@ -56,7 +57,8 @@ public class ReimbursementService {
                                 ReimbursementPolicy reimbursementPolicy,
                                 BudgetService budgetService,
                                 EscalationPolicyEngine escalationPolicyEngine,
-                                WorkflowConfigService workflowConfigService) {
+                                WorkflowConfigService workflowConfigService,
+                                FinanceService financeService) {
         this.reimbursementRepository = reimbursementRepository;
         this.userRepository = userRepository;
         this.departmentRepository = departmentRepository;
@@ -67,6 +69,7 @@ public class ReimbursementService {
         this.budgetService = budgetService;
         this.escalationPolicyEngine = escalationPolicyEngine;
         this.workflowConfigService = workflowConfigService;
+        this.financeService = financeService;
     }
 
     public List<ReimbursementResponse> findAll(UserRole viewerRole) {
@@ -131,12 +134,7 @@ public class ReimbursementService {
 
     @Transactional
     public ReimbursementResponse markPaid(int id, Integer actorId, ApprovalDecisionRequest decision) {
-        User actor = requireActor(actorId);
-        Reimbursement reimbursement = findEntityById(id);
-        TransitionResult result = reimbursementWorkflow.markPaid(reimbursement, actor);
-        recordHistory(reimbursement, actor, result, commentOf(decision), actor.getRole());
-        return reimbursementMapper.toResponse(
-                reimbursementRepository.save(reimbursement), UserRole.fromValue(actor.getRole()));
+        return financeService.markPaid(id, actorId, decision);
     }
 
     /** Legacy no-comment approve for older clients. */
@@ -162,11 +160,9 @@ public class ReimbursementService {
 
         recordHistory(reimbursement, actor, result, commentOf(decision), actor.getRole());
 
-        if (approve && result.to() == ReimbursementStatus.VENDOR_PROCESSING) {
-            if (reimbursement.getBudget() == null) {
-                throw new BadRequestException("Reimbursement is not linked to a budget");
-            }
-            budgetService.applySpendAtomically(reimbursement.getBudget().getId(), reimbursement.getAmount());
+        if (approve && result.to() == ReimbursementStatus.PENDING_VENDOR_CONFIRMATION) {
+            reimbursementRepository.save(reimbursement);
+            return financeService.syncAfterFinanceCommitment(reimbursement, actor);
         }
 
         return reimbursementMapper.toResponse(

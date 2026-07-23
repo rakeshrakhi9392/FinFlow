@@ -1,6 +1,8 @@
 package com.reimbursement.entity;
 
 import com.reimbursement.enums.ReimbursementStatus;
+import com.reimbursement.enums.VendorPaymentStatus;
+import com.reimbursement.enums.VendorSyncStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
@@ -54,6 +57,45 @@ public class Reimbursement {
 
     @Column
     private Instant statusChangedAt;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private VendorSyncStatus vendorSyncStatus = VendorSyncStatus.NOT_STARTED;
+
+    @Column(length = 64)
+    private String vendorSystem;
+
+    @Column(length = 64)
+    private String accountingDocument;
+
+    @Column(length = 64)
+    private String vendorReferenceNumber;
+
+    @Column
+    private LocalDate vendorPostingDate;
+
+    @Column(length = 64)
+    private String vendorId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 40)
+    private VendorPaymentStatus vendorPaymentStatus;
+
+    @Column
+    private Instant lastVendorSyncAt;
+
+    @Column(nullable = false)
+    private int vendorSyncAttempts;
+
+    @Lob
+    @Column
+    private String vendorResponse;
+
+    @Column(length = 64)
+    private String vendorErrorCode;
+
+    @Column(length = 500)
+    private String vendorErrorMessage;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -149,6 +191,102 @@ public class Reimbursement {
 
     public void setStatusChangedAt(Instant statusChangedAt) {
         this.statusChangedAt = statusChangedAt;
+    }
+
+    public VendorSyncStatus getVendorSyncStatus() {
+        return vendorSyncStatus;
+    }
+
+    public void setVendorSyncStatus(VendorSyncStatus vendorSyncStatus) {
+        this.vendorSyncStatus = vendorSyncStatus != null ? vendorSyncStatus : VendorSyncStatus.NOT_STARTED;
+    }
+
+    public String getVendorSystem() {
+        return vendorSystem;
+    }
+
+    public void setVendorSystem(String vendorSystem) {
+        this.vendorSystem = vendorSystem;
+    }
+
+    public String getAccountingDocument() {
+        return accountingDocument;
+    }
+
+    public void setAccountingDocument(String accountingDocument) {
+        this.accountingDocument = accountingDocument;
+    }
+
+    public String getVendorReferenceNumber() {
+        return vendorReferenceNumber;
+    }
+
+    public void setVendorReferenceNumber(String vendorReferenceNumber) {
+        this.vendorReferenceNumber = vendorReferenceNumber;
+    }
+
+    public LocalDate getVendorPostingDate() {
+        return vendorPostingDate;
+    }
+
+    public void setVendorPostingDate(LocalDate vendorPostingDate) {
+        this.vendorPostingDate = vendorPostingDate;
+    }
+
+    public String getVendorId() {
+        return vendorId;
+    }
+
+    public void setVendorId(String vendorId) {
+        this.vendorId = vendorId;
+    }
+
+    public VendorPaymentStatus getVendorPaymentStatus() {
+        return vendorPaymentStatus;
+    }
+
+    public void setVendorPaymentStatus(VendorPaymentStatus vendorPaymentStatus) {
+        this.vendorPaymentStatus = vendorPaymentStatus;
+    }
+
+    public Instant getLastVendorSyncAt() {
+        return lastVendorSyncAt;
+    }
+
+    public void setLastVendorSyncAt(Instant lastVendorSyncAt) {
+        this.lastVendorSyncAt = lastVendorSyncAt;
+    }
+
+    public int getVendorSyncAttempts() {
+        return vendorSyncAttempts;
+    }
+
+    public void setVendorSyncAttempts(int vendorSyncAttempts) {
+        this.vendorSyncAttempts = vendorSyncAttempts;
+    }
+
+    public String getVendorResponse() {
+        return vendorResponse;
+    }
+
+    public void setVendorResponse(String vendorResponse) {
+        this.vendorResponse = vendorResponse;
+    }
+
+    public String getVendorErrorCode() {
+        return vendorErrorCode;
+    }
+
+    public void setVendorErrorCode(String vendorErrorCode) {
+        this.vendorErrorCode = vendorErrorCode;
+    }
+
+    public String getVendorErrorMessage() {
+        return vendorErrorMessage;
+    }
+
+    public void setVendorErrorMessage(String vendorErrorMessage) {
+        this.vendorErrorMessage = vendorErrorMessage;
     }
 
     public User getUser() {

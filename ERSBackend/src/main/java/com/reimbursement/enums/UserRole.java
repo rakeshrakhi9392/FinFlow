@@ -93,11 +93,15 @@ public enum UserRole {
                     ReimbursementStatus.REQUIRES_SENIOR_APPROVAL);
             case FINANCE -> Set.of(
                     ReimbursementStatus.FINANCE_REVIEW,
+                    ReimbursementStatus.PENDING_VENDOR_CONFIRMATION,
+                    ReimbursementStatus.FAILED_VENDOR_SYNC,
                     ReimbursementStatus.VENDOR_PROCESSING);
             case ADMIN -> Set.of(
                     ReimbursementStatus.MANAGER_REVIEW,
                     ReimbursementStatus.SENIOR_MANAGER_REVIEW,
                     ReimbursementStatus.FINANCE_REVIEW,
+                    ReimbursementStatus.PENDING_VENDOR_CONFIRMATION,
+                    ReimbursementStatus.FAILED_VENDOR_SYNC,
                     ReimbursementStatus.VENDOR_PROCESSING,
                     ReimbursementStatus.MANAGER_APPROVAL,
                     ReimbursementStatus.REQUIRES_SENIOR_APPROVAL);

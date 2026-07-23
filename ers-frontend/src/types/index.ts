@@ -11,6 +11,8 @@ export type ReimbursementStatus =
   | 'MANAGER_REVIEW'
   | 'SENIOR_MANAGER_REVIEW'
   | 'FINANCE_REVIEW'
+  | 'PENDING_VENDOR_CONFIRMATION'
+  | 'FAILED_VENDOR_SYNC'
   | 'VENDOR_PROCESSING'
   | 'PAID'
   | 'DENIED'
@@ -27,9 +29,28 @@ export type ApprovalAction =
   | 'APPROVED'
   | 'DENIED'
   | 'ESCALATED'
+  | 'VENDOR_SYNC_PENDING'
+  | 'VENDOR_SYNC_SUCCESS'
+  | 'VENDOR_SYNC_FAILED'
+  | 'VENDOR_SYNC_RETRY'
   | 'VENDOR_MARKED_PAID'
   | 'COMMENT'
   | 'SYSTEM';
+
+export type VendorSyncStatus =
+  | 'NOT_STARTED'
+  | 'PENDING_VENDOR_CONFIRMATION'
+  | 'SYNCED'
+  | 'FAILED_VENDOR_SYNC';
+
+export type VendorPaymentStatus =
+  | 'NOT_POSTED'
+  | 'QUEUED'
+  | 'POSTED'
+  | 'SCHEDULED_FOR_PAYMENT'
+  | 'PAID'
+  | 'REJECTED'
+  | 'UNKNOWN';
 
 export type TimelineStageState = 'completed' | 'current' | 'upcoming' | 'skipped' | 'denied';
 
@@ -117,6 +138,41 @@ export interface Reimbursement {
   allowedActions?: string[];
   approvalHistory?: ApprovalHistoryEntry[];
   timeline?: WorkflowTimeline;
+  vendorSyncStatus?: VendorSyncStatus;
+  vendorSystem?: string;
+  accountingDocument?: string;
+  vendorReferenceNumber?: string;
+  vendorPostingDate?: string;
+  vendorId?: string;
+  vendorPaymentStatus?: VendorPaymentStatus;
+  lastVendorSyncAt?: string;
+  vendorSyncAttempts?: number;
+  vendorResponse?: string;
+  vendorErrorCode?: string;
+  vendorErrorMessage?: string;
+}
+
+export interface VendorIntegration {
+  reimbursementId: number;
+  amount: number;
+  description: string;
+  status: ReimbursementStatus;
+  statusLabel?: string;
+  submitterUsername?: string;
+  departmentName?: string;
+  integrationStatus: VendorSyncStatus;
+  vendorSystem?: string;
+  accountingDocument?: string;
+  referenceNumber?: string;
+  postingDate?: string;
+  vendorId?: string;
+  paymentStatus?: VendorPaymentStatus;
+  lastSyncAt?: string;
+  syncAttempts: number;
+  vendorResponse?: string;
+  errorCode?: string;
+  errorMessage?: string;
+  retryAllowed: boolean;
 }
 
 export interface CreateReimbursementPayload {

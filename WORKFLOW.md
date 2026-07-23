@@ -13,7 +13,9 @@ Senior Manager Review   ← only when escalation rules apply
     ↓
 Finance Review
     ↓
-Vendor Processing
+Pending Vendor Confirmation  ← Mock SAP / ERP post (timeout + retry)
+    ↓                        ↘ Failed Vendor Sync (retryable)
+Vendor Processing            ← ERP confirmed (accounting document present)
     ↓
 Paid
 ```
@@ -28,11 +30,15 @@ Any **review** stage (Manager, Senior Manager, Finance) may transition to **Deni
 | `MANAGER_REVIEW` | Waiting on manager |
 | `SENIOR_MANAGER_REVIEW` | Waiting on senior manager (escalated) |
 | `FINANCE_REVIEW` | Waiting on finance |
-| `VENDOR_PROCESSING` | Finance approved; awaiting payment confirmation |
+| `PENDING_VENDOR_CONFIRMATION` | Finance committed; ERP sync in progress / pending |
+| `FAILED_VENDOR_SYNC` | ERP sync failed; finance may retry |
+| `VENDOR_PROCESSING` | ERP confirmed; awaiting payment confirmation |
 | `PAID` | Terminal success |
 | `DENIED` | Terminal rejection |
 
-Budget spend is applied when a claim enters `VENDOR_PROCESSING` (finance commitment).
+Budget spend is applied when a claim first enters vendor confirmation (finance commitment).
+
+Vendor / ERP architecture, resilience settings, and dashboard APIs are documented in [INTEGRATION.md](./INTEGRATION.md).
 
 ## Escalation rules (configurable)
 
@@ -109,6 +115,8 @@ Password for all: `password`
 | `POST` | `/api/reimbursements/approve/{id}` | Manager / Senior / Finance / Admin |
 | `POST` | `/api/reimbursements/deny/{id}` | Manager / Senior / Finance / Admin |
 | `POST` | `/api/reimbursements/mark-paid/{id}` | Finance, Admin |
+| `GET` | `/api/vendor` | Finance, Admin — vendor integration dashboard |
+| `POST` | `/api/vendor/{id}/retry` | Finance, Admin — retry failed / pending ERP sync |
 | `GET` | `/api/workflow` | Elevated roles |
 | `PUT` | `/api/workflow` | Admin |
 
@@ -125,7 +133,8 @@ Role-specific dashboards:
 - `/employee-dashboard` — submit + personal timeline cards
 - `/manager-dashboard` — manager queue
 - `/senior-dashboard` — senior queue
-- `/finance-dashboard` — finance + mark paid
+- `/finance-dashboard` — finance + mark paid + link to vendor dashboard
+- `/vendor-dashboard` — integration status, last sync, vendor response, retry
 - `/admin-dashboard` — all claims + escalation config
 
 Each claim card supports status badges, expandable approval timeline, history with comments/timestamps, and role-gated actions.

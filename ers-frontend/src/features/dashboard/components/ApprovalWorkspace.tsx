@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ClaimCard } from '../../reimbursement/components/ClaimCard';
 import { reimbursementService } from '../../../services/reimbursementService';
+import { vendorService } from '../../../services/vendorService';
 import { getErrorMessage } from '../../../shared/utils/errorUtils';
 import { ROUTES } from '../../../shared/utils/constants';
 import { Reimbursement } from '../../../types';
@@ -12,6 +13,7 @@ interface ApprovalWorkspaceProps {
   subtitle: string;
   roleLabel: string;
   showBudgetLink?: boolean;
+  showVendorLink?: boolean;
   showAdminConfig?: boolean;
   fetchMode?: 'queue' | 'all';
 }
@@ -21,6 +23,7 @@ export const ApprovalWorkspace: React.FC<ApprovalWorkspaceProps> = ({
   subtitle,
   roleLabel,
   showBudgetLink = false,
+  showVendorLink = false,
   showAdminConfig = false,
   fetchMode = 'queue',
 }) => {
@@ -98,6 +101,15 @@ export const ApprovalWorkspace: React.FC<ApprovalWorkspaceProps> = ({
     }
   };
 
+  const handleRetryVendor = async (id: number) => {
+    try {
+      const updated = await vendorService.retry(id);
+      await refreshAfter(updated);
+    } catch (err) {
+      setError(getErrorMessage(err, `Failed to retry vendor sync #${id}`));
+    }
+  };
+
   const saveConfig = async () => {
     try {
       await reimbursementService.updateWorkflowConfig({
@@ -120,6 +132,7 @@ export const ApprovalWorkspace: React.FC<ApprovalWorkspaceProps> = ({
         <p>{subtitle}</p>
         <nav className="workspace-nav">
           {showBudgetLink && <Link to={ROUTES.budgetDashboard}>Budget Dashboard</Link>}
+          {showVendorLink && <Link to={ROUTES.vendorDashboard}>Vendor Dashboard</Link>}
           <Link to={ROUTES.logout}>Logout</Link>
         </nav>
       </header>
@@ -170,6 +183,7 @@ export const ApprovalWorkspace: React.FC<ApprovalWorkspaceProps> = ({
               onApprove={handleApprove}
               onDeny={handleDeny}
               onMarkPaid={handleMarkPaid}
+              onRetryVendor={handleRetryVendor}
             />
           ))
         )}

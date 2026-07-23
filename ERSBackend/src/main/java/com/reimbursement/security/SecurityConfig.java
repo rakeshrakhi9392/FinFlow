@@ -62,6 +62,8 @@ public class SecurityConfig {
                         .hasAnyRole("MANAGER", "SENIOR_MANAGER", "FINANCE", "ADMIN")
                         .requestMatchers(HttpMethod.POST, AppConstants.API_REIMBURSEMENTS + "/mark-paid/**")
                         .hasAnyRole("FINANCE", "ADMIN")
+                        .requestMatchers(AppConstants.API_VENDOR + "/**")
+                        .hasAnyRole("FINANCE", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, AppConstants.API_USERS + "/**")
                         .hasRole("ADMIN")
                         .requestMatchers(AppConstants.API_BUDGETS + "/**")

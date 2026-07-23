@@ -89,6 +89,19 @@ public class ReimbursementMapper {
         if (viewerRole != null) {
             response.setAllowedActions(resolveAllowedActions(reimbursement, viewerRole));
         }
+
+        response.setVendorSyncStatus(reimbursement.getVendorSyncStatus());
+        response.setVendorSystem(reimbursement.getVendorSystem());
+        response.setAccountingDocument(reimbursement.getAccountingDocument());
+        response.setVendorReferenceNumber(reimbursement.getVendorReferenceNumber());
+        response.setVendorPostingDate(reimbursement.getVendorPostingDate());
+        response.setVendorId(reimbursement.getVendorId());
+        response.setVendorPaymentStatus(reimbursement.getVendorPaymentStatus());
+        response.setLastVendorSyncAt(reimbursement.getLastVendorSyncAt());
+        response.setVendorSyncAttempts(reimbursement.getVendorSyncAttempts());
+        response.setVendorResponse(reimbursement.getVendorResponse());
+        response.setVendorErrorCode(reimbursement.getVendorErrorCode());
+        response.setVendorErrorMessage(reimbursement.getVendorErrorMessage());
         return response;
     }
 
@@ -126,12 +139,17 @@ public class ReimbursementMapper {
             return actions;
         }
         if (role.actionableStatuses().contains(status)
-                || (role.isAdmin() && (status.isReviewStage() || status == ReimbursementStatus.VENDOR_PROCESSING))) {
+                || (role.isAdmin() && (status.isReviewStage() || status.isVendorIntegrationStage()))) {
             if (status.isReviewStage()
                     || status == ReimbursementStatus.MANAGER_APPROVAL
                     || status == ReimbursementStatus.REQUIRES_SENIOR_APPROVAL) {
                 actions.add("APPROVE");
                 actions.add("DENY");
+            }
+            if ((status == ReimbursementStatus.FAILED_VENDOR_SYNC
+                    || status == ReimbursementStatus.PENDING_VENDOR_CONFIRMATION)
+                    && role.canProcessVendor()) {
+                actions.add("RETRY_VENDOR_SYNC");
             }
             if (status == ReimbursementStatus.VENDOR_PROCESSING && role.canProcessVendor()) {
                 actions.add("MARK_PAID");
@@ -167,6 +185,10 @@ public class ReimbursementMapper {
                 resolveStageState(ReimbursementStatus.FINANCE_REVIEW, current, needsSenior, denied, history),
                 false, findApprovalOf(history, ReimbursementStatus.FINANCE_REVIEW)));
 
+        stages.add(stage("VENDOR_SYNC", "Vendor ERP Sync", ReimbursementStatus.PENDING_VENDOR_CONFIRMATION,
+                resolveVendorSyncStageState(current, denied),
+                false, findVendorSyncCompletion(history)));
+
         stages.add(stage("VENDOR_PROCESSING", "Vendor Processing", ReimbursementStatus.VENDOR_PROCESSING,
                 resolveStageState(ReimbursementStatus.VENDOR_PROCESSING, current, needsSenior, denied, history),
                 false, findCompletion(history, ApprovalAction.VENDOR_MARKED_PAID, ReimbursementStatus.PAID)));
@@ -182,6 +204,32 @@ public class ReimbursementMapper {
 
         timeline.setStages(stages);
         return timeline;
+    }
+
+    private String resolveVendorSyncStageState(ReimbursementStatus current, boolean denied) {
+        if (denied) {
+            return "upcoming";
+        }
+        if (current == ReimbursementStatus.FAILED_VENDOR_SYNC) {
+            return "denied";
+        }
+        if (current == ReimbursementStatus.PENDING_VENDOR_CONFIRMATION) {
+            return "current";
+        }
+        if (current == ReimbursementStatus.VENDOR_PROCESSING
+                || current == ReimbursementStatus.PAID
+                || current == ReimbursementStatus.APPROVED) {
+            return "completed";
+        }
+        return "upcoming";
+    }
+
+    private CompletionMeta findVendorSyncCompletion(List<ApprovalHistory> history) {
+        return history.stream()
+                .filter(h -> h.getAction() == ApprovalAction.VENDOR_SYNC_SUCCESS)
+                .findFirst()
+                .map(this::toMeta)
+                .orElse(null);
     }
 
     private String resolveStageState(ReimbursementStatus stage, ReimbursementStatus current,
@@ -225,6 +273,7 @@ public class ReimbursementMapper {
             order.add(ReimbursementStatus.SENIOR_MANAGER_REVIEW);
         }
         order.add(ReimbursementStatus.FINANCE_REVIEW);
+        order.add(ReimbursementStatus.PENDING_VENDOR_CONFIRMATION);
         order.add(ReimbursementStatus.VENDOR_PROCESSING);
         order.add(ReimbursementStatus.PAID);
         return order;
@@ -238,6 +287,7 @@ public class ReimbursementMapper {
             case MANAGER_APPROVAL -> ReimbursementStatus.MANAGER_REVIEW;
             case REQUIRES_SENIOR_APPROVAL -> ReimbursementStatus.SENIOR_MANAGER_REVIEW;
             case APPROVED -> ReimbursementStatus.PAID;
+            case FAILED_VENDOR_SYNC -> ReimbursementStatus.PENDING_VENDOR_CONFIRMATION;
             default -> status;
         };
     }

@@ -21,6 +21,10 @@ const toneFor = (status: string): string => {
       return 'tone-senior';
     case 'FINANCE_REVIEW':
       return 'tone-finance';
+    case 'PENDING_VENDOR_CONFIRMATION':
+      return 'tone-vendor';
+    case 'FAILED_VENDOR_SYNC':
+      return 'tone-denied';
     case 'VENDOR_PROCESSING':
       return 'tone-vendor';
     case 'PAID':

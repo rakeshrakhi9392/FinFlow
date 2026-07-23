@@ -56,10 +56,24 @@ class ReimbursementWorkflowTest {
     }
 
     @Test
-    void financeApprovalMovesToVendor() {
+    void financeApprovalMovesToPendingVendor() {
         Reimbursement claim = baseClaim(ReimbursementStatus.FINANCE_REVIEW);
         var result = workflow.approve(claim, finance, config);
+        assertEquals(ReimbursementStatus.PENDING_VENDOR_CONFIRMATION, result.to());
+    }
+
+    @Test
+    void vendorSyncSuccessMovesToVendorProcessing() {
+        Reimbursement claim = baseClaim(ReimbursementStatus.PENDING_VENDOR_CONFIRMATION);
+        var result = workflow.vendorSyncSucceeded(claim);
         assertEquals(ReimbursementStatus.VENDOR_PROCESSING, result.to());
+    }
+
+    @Test
+    void vendorSyncFailureMovesToFailed() {
+        Reimbursement claim = baseClaim(ReimbursementStatus.PENDING_VENDOR_CONFIRMATION);
+        var result = workflow.vendorSyncFailed(claim);
+        assertEquals(ReimbursementStatus.FAILED_VENDOR_SYNC, result.to());
     }
 
     @Test

@@ -12,6 +12,9 @@ export const API_PATHS = {
   denyReimbursement: (id: number) => `/api/reimbursements/deny/${id}`,
   markPaid: (id: number) => `/api/reimbursements/mark-paid/${id}`,
   workflowConfig: '/api/workflow',
+  vendorIntegrations: '/api/vendor',
+  vendorIntegration: (id: number) => `/api/vendor/${id}`,
+  retryVendorSync: (id: number) => `/api/vendor/${id}/retry`,
   budgetSummary: '/api/budgets/summary',
   budgetDepartments: '/api/budgets/departments',
   categories: '/api/categories',
@@ -30,6 +33,7 @@ export const ROUTES = {
   financeDashboard: '/finance-dashboard',
   adminDashboard: '/admin-dashboard',
   budgetDashboard: '/budget-dashboard',
+  vendorDashboard: '/vendor-dashboard',
   home: '/',
 } as const;
 
@@ -38,6 +42,8 @@ export const STATUS_LABELS: Record<string, string> = {
   MANAGER_REVIEW: 'Manager Review',
   SENIOR_MANAGER_REVIEW: 'Senior Manager Review',
   FINANCE_REVIEW: 'Finance Review',
+  PENDING_VENDOR_CONFIRMATION: 'Pending Vendor Confirmation',
+  FAILED_VENDOR_SYNC: 'Failed Vendor Sync',
   VENDOR_PROCESSING: 'Vendor Processing',
   PAID: 'Paid',
   DENIED: 'Denied',
